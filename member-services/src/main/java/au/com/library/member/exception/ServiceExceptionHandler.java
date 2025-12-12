@@ -20,6 +20,12 @@ import java.time.LocalDateTime;
 @ControllerAdvice
 public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
 
+    /**
+     * Handles a {@link DuplicateEmailAddressException}.
+     * @param exception A reference to the {@link DuplicateEmailAddressException} object.
+     * @param request The {@link WebRequest} object.
+     * @return The {@link ResponseEntity} object containing the error details.
+     */
     @ExceptionHandler
     public ResponseEntity<ErrorDetails> handleDuplicateEmailAddressException(DuplicateEmailAddressException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), request.getDescription(false), "DUPLICATE_EMAIL_ADDRESS");
@@ -37,6 +43,12 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Handles a {@link BadRequestException}.
+     * @param exception A reference to the {@link BadRequestException} object.
+     * @param request The {@link WebRequest} object.
+     * @return The {@link ResponseEntity} object containing the error details.
+     */
     @ExceptionHandler
     public ResponseEntity<ErrorDetails> handleBadRequestException(BadRequestException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), request.getDescription(false), "BAD_REQUEST");

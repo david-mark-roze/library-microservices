@@ -1,13 +1,13 @@
 package au.com.library.member.service.impl;
 
 import au.com.library.member.dto.MemberDTO;
-import au.com.library.member.dto.MemberMapper;
 import au.com.library.member.entity.Member;
 import au.com.library.member.exception.DuplicateEmailAddressException;
 import au.com.library.member.repository.MemberRepository;
 import au.com.library.member.service.MemberService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ResourceNotFoundException;
+import au.com.library.shared.util.Mapper;
 import lombok.AllArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Service;
@@ -25,12 +25,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public MemberDTO add(MemberDTO memberDTO) throws DuplicateEmailAddressException {
-        return (save(MemberMapper.toMember(memberDTO)));
+        return (save(Mapper.map(memberDTO, Member.class)));
     }
 
     @Override
     public MemberDTO find(Long id) throws ResourceNotFoundException {
-        return MemberMapper.toMemberDTO(findById(id));
+        return Mapper.map(findById(id), MemberDTO.class);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class MemberServiceImpl implements MemberService {
 
     private MemberDTO save(Member member){
         try {
-            return MemberMapper.toMemberDTO(repository.save(member));
+            return Mapper.map(repository.save(member), MemberDTO.class);
         } catch (Exception e) {
             if (e.getCause() instanceof ConstraintViolationException){
                 // Will be because of a duplicate email
