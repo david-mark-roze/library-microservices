@@ -1,11 +1,8 @@
 package au.com.library.book.repository;
 
-import au.com.library.book.entity.Book;
-import au.com.library.book.entity.BookFormat;
-import au.com.library.book.entity.Edition;
+import au.com.library.book.entity.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,12 +14,14 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-public class BookRepositoryTest {
+public class BookServiceRepositoriesTest {
 
     @Autowired
     private BookRespository bookRespository;
     @Autowired
     private EditionRepository editionRepository;
+    @Autowired
+    private EditionCopyRepository editionCopyRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -165,7 +164,7 @@ public class BookRepositoryTest {
      */
     @Test
     @DisplayName("testCreateManyEditions")
-    public void givenManyEditionsCreate_whenSavingAll_thenManyEditionsCreated(){
+    public void givenManyNewEditions_whenSavingAll_thenManyEditionsCreated(){
         // Step 1: Save the parent Book
         Book savedBook = bookRespository.save(book);
         Edition edition1 = buildTestEdition(
@@ -200,8 +199,7 @@ public class BookRepositoryTest {
 
         // Step 3: Flush + clear to simulate a new request in production
         // before fetching the saved book
-        entityManager.flush();
-        entityManager.clear();
+        forceCommit();
 
         // Step 4: Load using a fresh persistence context to
         // simulate the state of a Book in production.
@@ -221,7 +219,7 @@ public class BookRepositoryTest {
      */
     @Test
     @DisplayName("testFindEditionById")
-    public void givenExisitngEdition_whenFindById_thenEditionFound(){
+    public void givenExisitngEdition_whenFindingById_thenEditionFound(){
 
         Book savedBook = bookRespository.save(book);
         Edition edition = buildTestEdition(
@@ -241,6 +239,117 @@ public class BookRepositoryTest {
         Assertions.assertThat(found.getBook()).isNotNull();
     }
 
+    /**
+     * Tests that an {@link EditionCopy edition copy} is created successfully.
+     */
+    @Test
+    @DisplayName("testCreateEditionCopy")
+    public void givenNewCopy_whenSavingCopy_thenCopyIsCreated(){
+        Book savedBook = bookRespository.save(book);
+
+        Edition edition = buildTestEdition(
+                savedBook,
+                "ISBN-123",
+                "1st Edition",
+                BookFormat.HARDBACK,
+                1943
+                ,"Tolkien Publishing");
+        Edition savedEdition = editionRepository.save(edition);
+
+        EditionCopy copy = buildTestEditionCopy(edition, "barcode");
+        EditionCopy savedCopy = editionCopyRepository.save(copy);
+
+        Assertions.assertThat(savedCopy).isNotNull();
+        Assertions.assertThat(savedCopy.getEdition()).isNotNull();
+        Assertions.assertThat(savedCopy.getEdition().getBook()).isNotNull();
+    }
+    /**
+     * Tests that an existing {@link EditionCopy edition copy} is updated successfully.
+     */
+    @Test
+    @DisplayName("testUpdateEditionCopy")
+    public void givenExistingCopy_whenSavingCopy_thenCopyIsUpdated(){
+        Book savedBook = bookRespository.save(book);
+
+        Edition edition = buildTestEdition(
+                savedBook,
+                "ISBN-123",
+                "1st Edition",
+                BookFormat.HARDBACK,
+                1943
+                ,"Tolkien Publishing");
+        Edition savedEdition = editionRepository.save(edition);
+
+        EditionCopy copy = buildTestEditionCopy(edition, "barcode");
+        EditionCopy savedCopy = editionCopyRepository.save(copy);
+
+        savedCopy.setStatus(EditionCopyStatus.LOANED);
+        EditionCopy updatedCopy = editionCopyRepository.save(copy);
+
+        Assertions.assertThat(updatedCopy.getStatus()).isEqualTo(savedCopy.getStatus());
+    }
+
+    /**
+     * This test tests the creation of many {@link EditionCopy edition copiess} of an {@link Edition edition}
+     * and the subsequent fetching of that edition, testing that
+     * <ul>
+     *     <li>The copies for that edition are created successfully</li>
+     *     <li>When the edition is subsequently fetched, the associated copies
+     *     are also fetched with the edition.</li>
+     * </ul>
+     * This production like environment is simulated by {@link EntityManager#flush() flushing}
+     * and {@link EntityManager#clear() clearing} the {@link EntityManager} before
+     * {@link EditionRepository#findById(Object) fetching the edition}.
+     */
+    @Test
+    @DisplayName("testCreateManyEditionCopies")
+    public void givenManyNewEditionCopies_whenSavingAll_thenManyEditionCopiesCreated(){
+        // Step 1: Save the parent Book
+        Book savedBook = bookRespository.save(book);
+
+        // Step 2: Create and save the child edition of the book which is the parent edition
+        // of the new copies
+        Edition edition = buildTestEdition(
+                savedBook,
+                "ISBN-123",
+                "1st Edition",
+                BookFormat.HARDBACK,
+                1943
+                ,"Tolkien Publishing");
+        Edition savedEdition = editionRepository.save(edition);
+
+        // Step 3: Create and save the new edition copies
+        EditionCopy copy1 = buildTestEditionCopy(edition, "barcode1");
+        EditionCopy copy2 = buildTestEditionCopy(edition, "barcode2");
+        EditionCopy copy3 = buildTestEditionCopy(edition, "barcode3");
+
+        List<EditionCopy> toSave = List.of(copy1, copy2, copy3);
+        List<EditionCopy> savedCopies = editionCopyRepository.saveAll(toSave);
+
+        // Step 4: Test the 'save all' results look as expected
+        Assertions.assertThat(savedCopies).isNotNull();
+        Assertions.assertThat(savedCopies.size()).isEqualTo(toSave.size());
+
+        // Step 5: Flush + clear to simulate a new request in production
+        // before fetching the saved edition to check for the presence of
+        // its children and related entities.
+        forceCommit();
+
+        // Fetch the addition post flush and clear to check the validity of it, its
+        // related copies and other related entities.
+        Edition foundEdition = editionRepository.findById(
+                edition.getId()).orElseThrow(
+                        () -> new IllegalStateException("Edition not found")
+        );
+        Assertions.assertThat(foundEdition.getCopies()).isNotNull();
+        Assertions.assertThat(foundEdition.getCopies().size()).isEqualTo(savedCopies.size());
+        EditionCopy selectedCopy = foundEdition.getCopies().stream().findFirst().get();
+        Assertions.assertThat(selectedCopy.getEdition()).isNotNull();
+        Assertions.assertThat(selectedCopy.getEdition().getId()).isEqualTo(savedEdition.getId());
+        Assertions.assertThat(selectedCopy.getEdition().getBook()).isNotNull();
+        Assertions.assertThat(selectedCopy.getEdition().getBook().getId()).isEqualTo(savedBook.getId());
+    }
+
     private Edition buildTestEdition(Book book, String isbn, String edition, BookFormat format, int year, String publisher){
         return Edition.builder().
                 isbn(isbn).
@@ -249,5 +358,18 @@ public class BookRepositoryTest {
                 publicationYear(year).
                 publisher(publisher).
                 book(book).build();
+    }
+
+    private EditionCopy buildTestEditionCopy(Edition edition, String barcode){
+        return EditionCopy.builder().
+                barcode(barcode).
+                edition(edition).
+                status(EditionCopyStatus.AVAILABLE).
+                build();
+    }
+
+    private void forceCommit(){
+        entityManager.flush();
+        entityManager.clear();
     }
 }

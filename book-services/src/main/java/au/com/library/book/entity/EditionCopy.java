@@ -1,19 +1,23 @@
 package au.com.library.book.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
 
+/**
+ * This represents a copy of an {@link Edition book edition} at the library
+ * of which there may be more than one.
+ *
+ * @see Edition
+ */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 public class EditionCopy {
 
