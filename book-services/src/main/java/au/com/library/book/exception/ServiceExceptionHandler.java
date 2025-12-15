@@ -26,4 +26,16 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), request.getDescription(false), "BAD_REQUEST");
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
+
+    /**
+     * Handles a {@link ResourceNotFoundException}.
+     * @param exception A reference to the {@link ResourceNotFoundException} object.
+     * @param request The {@link WebRequest} object.
+     * @return The {@link ResponseEntity} object containing the error details.
+     */
+    @ExceptionHandler
+    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException exception, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), request.getDescription(false), "NOT_FOUND");
+        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    }
 }

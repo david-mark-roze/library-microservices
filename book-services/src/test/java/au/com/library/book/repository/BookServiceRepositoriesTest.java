@@ -238,6 +238,61 @@ public class BookServiceRepositoriesTest {
         Assertions.assertThat(found).isNotNull();
         Assertions.assertThat(found.getBook()).isNotNull();
     }
+    /**
+     * Tests all editions associated with a book can be retrieved successfully
+     * for that book.
+     */
+    @Test
+    @DisplayName("testFindEditionsByBookId")
+    public void givenExisitingEditions_whenFindingEditionsByBookId_thenEditionsFound(){
+
+        // Step 1: Save the parent Book
+        Book savedBook = bookRespository.save(book);
+        Edition edition1 = buildTestEdition(
+                savedBook,
+                "ISBN-123",
+                "1st Edition",
+                BookFormat.HARDBACK,
+                1943
+                ,"Tolkien Publishing");
+
+        // Step 2: Save the child editions
+        Edition edition2 = buildTestEdition(
+                savedBook,
+                "ISBN-124",
+                "2st Edition",
+                BookFormat.HARDBACK,
+                1950
+                ,"Tolkien Publishing");
+        Edition edition3 = buildTestEdition(
+                savedBook,
+                "ISBN-125",
+                "3st Edition",
+                BookFormat.HARDBACK,
+                1955
+                ,"Tolkien Publishing");
+
+        List<Edition> toSave = List.of(edition1, edition2, edition3);
+        List<Edition> saved = editionRepository.saveAll(toSave);
+
+        Assertions.assertThat(saved).isNotNull();
+        Assertions.assertThat(saved.size()).isEqualTo(toSave.size());
+
+        // Step 3: Flush + clear to simulate a new request in production
+        // before fetching the saved book
+        forceCommit();
+
+        // Step 4: Load the editions for the book using a fresh persistence context to
+        // simulate the state of a editions in production.
+        List<Edition> editions = editionRepository.findByBookId(savedBook.getId());
+
+        // The editions should be present
+        Assertions.assertThat(editions).isNotNull();
+        Edition selectedEdition = editions.stream().findFirst().get();
+        // Checked that the editions have a reference to the book by
+        // checking the first one in the List
+        Assertions.assertThat(selectedEdition.getBook()).isNotNull();
+    }
 
     /**
      * Tests that an {@link EditionCopy edition copy} is created successfully.
