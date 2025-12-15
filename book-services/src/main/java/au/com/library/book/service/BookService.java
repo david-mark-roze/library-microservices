@@ -25,7 +25,7 @@ public interface BookService {
      * @return A {@link BookDTO} object containing the updated book details.
      * @throws ResourceNotFoundException Thrown when a book with the specified id could not be found.
      */
-    BookDTO update(Long id, BookDTO bookDTO) throws ResourceNotFoundException;
+    BookDTO updateBook(Long id, BookDTO bookDTO) throws ResourceNotFoundException;
 
     /**
      * Handles the retrieval of library book details.
@@ -33,7 +33,7 @@ public interface BookService {
      * @return A {@link BookDTO} object containing the book details.
      * @throws ResourceNotFoundException Thrown when a book with the specified id could not be found.
      */
-    BookDTO find(Long id) throws ResourceNotFoundException;
+    BookDTO findBook(Long id) throws ResourceNotFoundException;
 
     /**
      * Handles the creation of the {@link au.com.library.book.entity.Edition edition} of a {@link au.com.library.book.entity.Book book}.

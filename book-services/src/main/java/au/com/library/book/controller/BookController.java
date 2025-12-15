@@ -40,8 +40,8 @@ public class BookController {
      * @return A {@link ResponseEntity} object containing the book data after the replacement.
      */
     @PutMapping("/{id}")
-    public ResponseEntity<BookDTO> update(@PathVariable Long id, @RequestBody BookDTO bookDTO){
-        return ResponseEntity.ok(service.update(id, bookDTO));
+    public ResponseEntity<BookDTO> updateBook(@PathVariable Long id, @RequestBody BookDTO bookDTO){
+        return ResponseEntity.ok(service.updateBook(id, bookDTO));
     }
 
 
@@ -51,8 +51,8 @@ public class BookController {
      * @return A {@link ResponseEntity} object containing the retrieved book details.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> find(@PathVariable Long id){
-        return ResponseEntity.ok(service.find(id));
+    public ResponseEntity<BookDTO> findBook(@PathVariable Long id){
+        return ResponseEntity.ok(service.findBook(id));
     }
 
     /**

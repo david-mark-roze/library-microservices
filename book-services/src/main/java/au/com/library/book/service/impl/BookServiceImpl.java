@@ -40,7 +40,7 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public BookDTO update(Long id, BookDTO bookDTO) throws ResourceNotFoundException {
+    public BookDTO updateBook(Long id, BookDTO bookDTO) throws ResourceNotFoundException {
         Book book = findBookById(id);
         book.setTitle(bookDTO.getTitle());
         book.setAuthor(bookDTO.getAuthor());
@@ -54,7 +54,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional(readOnly = true)
-    public BookDTO find(Long id) throws ResourceNotFoundException {
+    public BookDTO findBook(Long id) throws ResourceNotFoundException {
         return Mapper.map(findBookById(id), BookDTO.class);
     }
 

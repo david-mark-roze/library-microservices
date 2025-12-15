@@ -51,7 +51,7 @@ public class BookServiceRepositoriesTest {
     }
 
     /**
-     * Tests the successful update of an existing {@link Book book}.
+     * Tests the successful updateBook of an existing {@link Book book}.
      */
     @Test
     @DisplayName("testUpdateBook")
@@ -90,7 +90,7 @@ public class BookServiceRepositoriesTest {
         Assertions.assertThatThrownBy(() -> bookRespository.save(book));
     }
     /**
-     * Tests that an attempt to update an existing {@link Book book} that has had required fields
+     * Tests that an attempt to updateBook an existing {@link Book book} that has had required fields
      * removed fails.
      */
     @Test
