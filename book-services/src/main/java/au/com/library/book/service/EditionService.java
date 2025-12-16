@@ -3,10 +3,22 @@ package au.com.library.book.service;
 import au.com.library.book.dto.EditionDTO;
 import au.com.library.shared.exception.ResourceNotFoundException;
 
+import java.util.Collection;
+
 /**
- * The service level interface handling the retrieval and update of {@link au.com.library.book.entity.Edition edition} details.
+ * The service level interface handling addition, update and retrieval of {@link au.com.library.book.entity.Edition edition} details.
  */
 public interface EditionService {
+    /**
+     * Handles the creation of the {@link au.com.library.book.entity.Edition edition} of a {@link au.com.library.book.entity.Book book}.
+     * @param bookId The id of the associated book details.
+     * @param editionDTO The edition details.
+     * @return An {@link EditionDTO} object containing the details of the creation edition.
+     * @throws ResourceNotFoundException Thrown when the associated book could not be found.
+     */
+    EditionDTO addEdition(Long bookId, EditionDTO editionDTO) throws ResourceNotFoundException;
+
+    Collection<EditionDTO> findEditions(Long bookId) throws ResourceNotFoundException;
 
     /**
      * Handles the retrieval of book edition details.

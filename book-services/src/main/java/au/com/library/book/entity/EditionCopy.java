@@ -14,7 +14,6 @@ import java.util.Date;
  * @see Edition
  */
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -22,14 +21,21 @@ import java.util.Date;
 public class EditionCopy {
 
     private static final int LENGTH_STATUS = 50;
+    private static final int LENGTH_BARCODE = 50;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(
+            nullable = false,
+            updatable = false,
+            unique = true,
+            length = LENGTH_BARCODE
+    )
     private String barcode;
 
+    @Setter
     @Column(nullable = false, length = LENGTH_STATUS)
     @Enumerated(EnumType.STRING)
     private EditionCopyStatus status;
@@ -38,6 +44,7 @@ public class EditionCopy {
     @CreationTimestamp
     private LocalDateTime dateAquired;
 
+    @Setter
     // Bi-directional many to one - This child EditionCopy references its parent Edition via
     // the 'edition_id' foreign key. In the parent, this is the 'id' column.
     @JoinColumn(name = "edition_id", referencedColumnName = "id", nullable = false)

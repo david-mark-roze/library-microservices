@@ -27,7 +27,6 @@ import java.util.List;
 public class BookServiceImpl implements BookService {
 
     private BookRespository bookRespository;
-    private EditionRepository editionRepository;
 
     @Override
     public BookDTO addBook(BookDTO bookDTO) {
@@ -56,26 +55,6 @@ public class BookServiceImpl implements BookService {
     @Transactional(readOnly = true)
     public BookDTO findBook(Long id) throws ResourceNotFoundException {
         return Mapper.map(findBookById(id), BookDTO.class);
-    }
-
-    @Override
-    public EditionDTO addEdition(Long bookId, EditionDTO editionDTO) throws ResourceNotFoundException {
-        Book book = findBookById(bookId);
-        Edition edition = Mapper.map(editionDTO, Edition.class);
-        edition.setBook(book);
-        Edition saved = editionRepository.save(edition);
-        return Mapper.map(saved, EditionDTO.class);
-    }
-
-    @Override
-    public Collection<EditionDTO> findEditions(Long bookId) throws ResourceNotFoundException {
-        if(!bookRespository.existsById(bookId)){
-            throw new ResourceNotFoundException(String.format("The book with the id %s could not be found", bookId));
-        }
-        List<Edition> editions = editionRepository.findByBookId(bookId);
-        return editions.stream().map(
-                (e) -> Mapper.map(e, EditionDTO.class)
-        ).toList();
     }
 
     private Book findBookById(Long id){

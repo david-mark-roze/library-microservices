@@ -3,6 +3,7 @@ package au.com.library.book.controller;
 import au.com.library.book.dto.BookDTO;
 import au.com.library.book.dto.EditionDTO;
 import au.com.library.book.service.BookService;
+import au.com.library.book.service.EditionService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.Collection;
  * creation and retrieval of edition details.
  *
  * @see BookService
+ * @see EditionService
  */
 @AllArgsConstructor
 @RestController
@@ -22,6 +24,7 @@ import java.util.Collection;
 public class BookController {
 
     private BookService service;
+    private EditionService editionService;
 
     /**
      * Handles a REST API POST request to create a library book.
@@ -63,7 +66,7 @@ public class BookController {
      */
     @PostMapping("/{bookId}/editions")
     public ResponseEntity<EditionDTO> addEdition(@PathVariable Long bookId, @RequestBody EditionDTO editionDTO){
-        return new ResponseEntity<EditionDTO>(service.addEdition(bookId, editionDTO), HttpStatus.CREATED);
+        return new ResponseEntity<EditionDTO>(editionService.addEdition(bookId, editionDTO), HttpStatus.CREATED);
     }
 
 
@@ -74,6 +77,6 @@ public class BookController {
      */
     @GetMapping("/{bookId}/editions")
     public ResponseEntity<Collection<EditionDTO>> findEditions(@PathVariable Long bookId){
-        return ResponseEntity.ok(service.findEditions(bookId));
+        return ResponseEntity.ok(editionService.findEditions(bookId));
     }
 }

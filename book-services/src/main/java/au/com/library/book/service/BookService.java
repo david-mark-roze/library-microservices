@@ -7,7 +7,8 @@ import au.com.library.shared.exception.ResourceNotFoundException;
 import java.util.Collection;
 
 /**
- * The service level interface for handling {@link au.com.library.book.entity.Book books}.
+ * The service level interface for handling the addition, update and
+ * retrieval of {@link au.com.library.book.entity.Book books}.
  */
 public interface BookService {
 
@@ -34,15 +35,4 @@ public interface BookService {
      * @throws ResourceNotFoundException Thrown when a book with the specified id could not be found.
      */
     BookDTO findBook(Long id) throws ResourceNotFoundException;
-
-    /**
-     * Handles the creation of the {@link au.com.library.book.entity.Edition edition} of a {@link au.com.library.book.entity.Book book}.
-     * @param bookId The id of the associated book details.
-     * @param editionDTO The edition details.
-     * @return An {@link EditionDTO} object containing the details of the creation edition.
-     * @throws ResourceNotFoundException Thrown when the associated book could not be found.
-     */
-    EditionDTO addEdition(Long bookId, EditionDTO editionDTO) throws ResourceNotFoundException;
-
-    Collection<EditionDTO> findEditions(Long bookId) throws ResourceNotFoundException;
 }
