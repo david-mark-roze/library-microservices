@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.Set;
+
 /**
  * A data transfer object containing {@link au.com.library.book.entity.Edition edtion} data for
  * REST API requests and responses, including the persistence of editions, the retrieval of editions
