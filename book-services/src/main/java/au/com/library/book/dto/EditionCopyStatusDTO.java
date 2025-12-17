@@ -3,19 +3,16 @@ package au.com.library.book.dto;
 import au.com.library.book.entity.EditionCopyStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
+/**
+ * A data transfer object used to update the {@link EditionCopyStatus status} of
+ * an {@link au.com.library.book.entity.EditionCopy edition copy}.
+ *
+ */
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@Setter
-public class EditionCopyDTO {
+public class EditionCopyStatusDTO {
 
-    private Long id;
-    private String barcode;
     private EditionCopyStatus status;
-    private LocalDateTime dateAcquired;
 }

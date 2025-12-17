@@ -1,6 +1,7 @@
 package au.com.library.book.service;
 
 import au.com.library.book.dto.EditionCopyDTO;
+import au.com.library.book.dto.EditionCopyStatusDTO;
 import au.com.library.shared.exception.ResourceNotFoundException;
 
 import java.util.List;
@@ -23,21 +24,33 @@ public interface EditionCopyService {
     EditionCopyDTO addCopy(Long editionId) throws ResourceNotFoundException;
 
     /**
-     * Handles the update/replacement of {@link au.com.library.book.entity.EditionCopy editon copy} details.
-     * @param copyId The id of the edition copy.
-     * @param copyDTO An {@link EditionCopyDTO} containing the edition copy update details.
-     * @return An {@link EditionCopyDTO} object containing the updated copy details.
-     * @throws ResourceNotFoundException Thrown when the edition copy to update could not be found.
+     * Updates the {@link au.com.library.book.entity.EditionCopyStatus status} of an {@link au.com.library.book.entity.EditionCopy edition copy}.
+     * Will be called when:
+     * <ul>
+     *     <li>An {@link au.com.library.book.entity.EditionCopyStatus#AVAILABLE available} copy is borrowed
+     *     and marked as {@link au.com.library.book.entity.EditionCopyStatus#LOANED loaned}.
+     *     </li>
+     *     <li>A borrowed copy is returned and set back to {@link au.com.library.book.entity.EditionCopyStatus#AVAILABLE available}.</li>
+     *     <li>An unreturned or otherwise missing copy is marked as {@link au.com.library.book.entity.EditionCopyStatus#LOST lost}.</li>
+     * </ul>
+     * <p>If the status is unchanged, no update will occur.</p>
+     * <p>If an edition copy is marked as {@link au.com.library.book.entity.EditionCopyStatus#LOST} its status cannot be changed.
+     * If an attempt is made, a {@link au.com.library.shared.exception.BadRequestException} will be thrown.</p>
+     *
+     * @param editionId The id of the {@link au.com.library.book.entity.Edition edition} to which the copy is linked.
+     * @param copyId The id of the {@link au.com.library.book.entity.EditionCopy copy}.
+     * @param statusDTO An {@link EditionCopyStatusDTO} object containing the status to set.
+     * @return An {@link EditionCopyStatusDTO} object containing the copy details and its new status.
      */
-    EditionCopyDTO updateCopy(Long copyId, EditionCopyDTO copyDTO) throws ResourceNotFoundException;
-
+    EditionCopyDTO updateCopyStatus(Long editionId, Long copyId, EditionCopyStatusDTO statusDTO);
     /**
      * Handles the retrieval of a single set of edition copy details.
+     * @param editionId The id of the edition linked to the copy.
      * @param copyId The id of the edition copy.
      * @return An {@link EditionCopyDTO} object containing the edition copy details.
-     * @throws ResourceNotFoundException Thrown when the edition copy could not be found.
+     * @throws ResourceNotFoundException Thrown when either the edition or edition copy could not be found.
      */
-    EditionCopyDTO findCopy(Long copyId) throws ResourceNotFoundException;
+    EditionCopyDTO findCopy(Long editionId, Long copyId) throws ResourceNotFoundException;
 
     /**
      * Handles the retrieval of all {@link au.com.library.book.entity.EditionCopy copies} of an {@link au.com.library.book.entity.Edition edition}.

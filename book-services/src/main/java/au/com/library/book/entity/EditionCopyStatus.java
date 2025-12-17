@@ -8,5 +8,17 @@ public enum EditionCopyStatus {
 
     AVAILABLE,
     LOANED,
-    LOST
+    LOST;
+
+    public boolean isLoaned(){
+        return LOANED.equals(this);
+    }
+
+    public boolean isAvailable(){
+        return AVAILABLE.equals(this);
+    }
+
+    public boolean isLost(){
+        return LOST.equals(this);
+    }
 }
