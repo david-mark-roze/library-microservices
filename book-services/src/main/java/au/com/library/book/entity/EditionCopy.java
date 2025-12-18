@@ -2,7 +2,8 @@ package au.com.library.book.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EntityListeners(AuditingEntityListener.class)
 @Entity
 public class EditionCopy {
 
@@ -39,7 +41,7 @@ public class EditionCopy {
     private EditionCopyStatus status;
 
     @Column(nullable = false)
-    @CreationTimestamp
+    @CreatedDate
     private LocalDateTime dateAcquired;
 
     // Bidirectional many to one - This child EditionCopy references its parent Edition via
