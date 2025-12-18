@@ -34,7 +34,6 @@ public class EditionCopy {
     )
     private String barcode;
 
-    @Setter
     @Column(nullable = false, length = LENGTH_STATUS)
     @Enumerated(EnumType.STRING)
     private EditionCopyStatus status;
@@ -43,11 +42,48 @@ public class EditionCopy {
     @CreationTimestamp
     private LocalDateTime dateAcquired;
 
-    @Setter
+    // Bidirectional many to one - This child EditionCopy references its parent Edition via
     // Bidirectional many to one - This child EditionCopy references its parent Edition via
     // the 'edition_id' foreign key. In the parent, this is the 'id' column.
     @JoinColumn(name = "edition_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Edition edition;
 
+    /**
+     * Marks this copy as being {@link EditionCopyStatus#LOANED on loan}, if it is not already.
+     * @throws IllegalStateException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost}.
+     */
+    public void markBorrowed(){
+        checkLost();
+        if(status.isAvailable()){
+            status = EditionCopyStatus.LOANED;
+        }
+    }
+
+    /**
+     * Marks this copy as being {@link EditionCopyStatus#AVAILABLE available} after being returned.
+     * @throws IllegalStateException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost}.
+     */
+    public void markAvailable(){
+        checkLost();
+        if(status.isLoaned()){
+            status = EditionCopyStatus.AVAILABLE;
+        }
+    }
+
+    /**
+     * Marks this copy as being lost i.e. a physical or digital copy no longer exists on
+     * the library premises. This cannot be changed.
+     */
+    public void markLost(){
+        if(!status.isLost()){
+            status = EditionCopyStatus.LOST;
+        }
+    }
+
+    private void checkLost(){
+        if(status.isLost()){
+            throw new IllegalStateException("This edition copy is lost. Its status cannot be changed.");
+        }
+    }
 }

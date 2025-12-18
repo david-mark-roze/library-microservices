@@ -13,11 +13,11 @@ public interface EditionCopyRepository extends JpaRepository<EditionCopy, Long> 
 
     /**
      * Handles the retrieval of an {@link EditionCopy edition copy}, specifying both the edition id and the copy id.
-     * @param editionId The id of the edition linked to the copy.
      * @param copyId The id of the copy.
+     * @param editionId The id of the edition linked to the copy.
      * @return An {@link Optional} object containing the retrieved {@link EditionCopy copy}.
      */
-    Optional<EditionCopy> findByIdAndEditionId(Long editionId, Long copyId);
+    Optional<EditionCopy> findByIdAndEditionId(Long copyId, Long editionId);
 
     /**
      * Handles the retrieval of all {@link EditionCopy edition copies} for an {@link au.com.library.book.entity.Edition edition}.

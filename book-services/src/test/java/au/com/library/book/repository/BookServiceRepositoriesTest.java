@@ -338,7 +338,7 @@ public class BookServiceRepositoriesTest {
         EditionCopy copy = buildTestEditionCopy(edition, "barcode");
         EditionCopy savedCopy = editionCopyRepository.save(copy);
 
-        savedCopy.setStatus(EditionCopyStatus.LOANED);
+        savedCopy.markBorrowed();
         EditionCopy updatedCopy = editionCopyRepository.save(copy);
 
         Assertions.assertThat(updatedCopy.getStatus()).isEqualTo(savedCopy.getStatus());
