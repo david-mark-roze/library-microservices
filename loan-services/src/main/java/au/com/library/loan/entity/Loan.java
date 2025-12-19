@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
 
@@ -52,6 +51,7 @@ public class Loan {
     @Setter
     private LocalDate returnDate;
 
+    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
@@ -66,5 +66,21 @@ public class Loan {
             throw new IllegalStateException("The due date has not been set");
         }
         dueDate = loanDate.plusDays(loanPeriodDays);
+    }
+
+    /**
+     * Marks a loan as {@link LoanStatus#RETURNED returned} if it is currently
+     * {@link LoanStatus#BORROWED borrowed}, {@link LoanStatus#RENEWED renewed} or
+     * {@link LoanStatus#OVERDUE overdue} and sets the {@link #getReturnDate() return date}.
+     * @throws IllegalStateException Thrown when the loan is {@link LoanStatus#LOST}.
+     */
+    public void returnLoan(){
+        if(status.isLost()){
+            throw new IllegalStateException("Unable to mark the loan as returned. Its status is lost");
+        }
+        if(!status.isReturned()){
+            status = LoanStatus.RETURNED;
+            returnDate = LocalDate.now();
+        }
     }
 }

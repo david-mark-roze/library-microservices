@@ -8,7 +8,10 @@ import au.com.library.loan.repository.LoanRepository;
 import au.com.library.loan.service.BookClient;
 import au.com.library.loan.service.LoanService;
 import au.com.library.loan.service.MemberClient;
+import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.Mapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +22,8 @@ import java.time.LocalDate;
  */
 @Service
 public class LoanServiceImpl implements LoanService {
+
+    private Logger LOGGER = LoggerFactory.getLogger(LoanServiceImpl.class);
 
     private BookClient bookClient;
     private MemberClient memberClient;
@@ -61,5 +66,12 @@ public class LoanServiceImpl implements LoanService {
         loan.calculateDueDate(loanPeriodDays);
         Loan saved = repository.save(loan);
         return Mapper.map(saved, LoanResponseDTO.class);
+    }
+
+    @Override
+    public LoanResponseDTO returnLoan(Long id) {
+        Loan loan = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("The loan with the id %s could not be found"));
+        loan.returnLoan();
+        return Mapper.map(repository.save(loan), LoanResponseDTO.class);
     }
 }

@@ -21,4 +21,11 @@ public interface LoanService {
      * @throws CopyUnavailableException Thrown when the request copy of a book is unavailable.
      */
     LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException;
+
+    /**
+     * Handles the returning of a loan. The {@link au.com.library.loan.entity.LoanStatus} will be changed to {@link au.com.library.loan.entity.LoanStatus#RETURNED returned} and populated with a return date.
+     * @param id The id of the returned loan.
+     * @return A {@link LoanResponseDTO} object containing details of the returned loan.
+     */
+    LoanResponseDTO returnLoan(Long id);
 }
