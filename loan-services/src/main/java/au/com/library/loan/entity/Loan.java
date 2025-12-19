@@ -13,7 +13,6 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @Entity
-@EntityListeners(AuditingEntityListener.class)
 public class Loan {
 
     @Id
