@@ -1,10 +1,7 @@
 package au.com.library.book.service;
 
 import au.com.library.book.dto.BookDTO;
-import au.com.library.book.dto.EditionDTO;
 import au.com.library.shared.exception.ResourceNotFoundException;
-
-import java.util.Collection;
 
 /**
  * The service level interface for handling the addition, update and

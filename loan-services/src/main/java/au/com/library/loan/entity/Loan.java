@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Getter
@@ -39,9 +36,14 @@ public class Loan {
     private String bookTitle;
 
     @Column(nullable = false)
+    private String author;
+
+    @Column(nullable = false)
+    private String edition;
+
+    @Column(nullable = false)
     private String barcode;
 
-    @CreatedDate
     @Column(nullable = false)
     private LocalDate loanDate;
 
@@ -54,4 +56,16 @@ public class Loan {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
+
+    /**
+     * Calculates the {@link #getDueDate() due date} of based on the specified relative number of days from the loan date.
+     * @param loanPeriodDays The number of days from the loan date to calculate the due date.
+     * @throws IllegalStateException Thrown if
+     */
+    public void calculateDueDate(int loanPeriodDays){
+        if(loanDate == null){
+            throw new IllegalStateException("The due date has not been set");
+        }
+        dueDate = loanDate.plusDays(loanPeriodDays);
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * The {@link EditionService} implementation.
@@ -28,7 +29,7 @@ public class EditionServiceImpl implements EditionService {
     @Override
     @Transactional(readOnly = true)
     public EditionDTO findEdition(Long id) throws ResourceNotFoundException {
-        return Mapper.map(findById(id), EditionDTO.class);
+        return EditionDTO.toDTO(findById(id));
     }
 
     @Override
@@ -40,9 +41,7 @@ public class EditionServiceImpl implements EditionService {
         edition.setFormat(editionDTO.getFormat());
         edition.setPublicationYear(editionDTO.getPublicationYear());
         edition.setPublisher(editionDTO.getPublisher());
-
-        Edition saved = editionRepository.save(edition);
-        return Mapper.map(saved, EditionDTO.class);
+        return EditionDTO.toDTO(editionRepository.save(edition));
     }
 
 
@@ -54,8 +53,7 @@ public class EditionServiceImpl implements EditionService {
         );
         Edition edition = Mapper.map(editionDTO, Edition.class);
         edition.setBook(book);
-        Edition saved = editionRepository.save(edition);
-        return Mapper.map(saved, EditionDTO.class);
+        return EditionDTO.toDTO(editionRepository.save(edition));
     }
 
     @Override
@@ -64,9 +62,7 @@ public class EditionServiceImpl implements EditionService {
             throw new ResourceNotFoundException(String.format("The book with the id %s could not be found", bookId));
         }
         List<Edition> editions = editionRepository.findByBookId(bookId);
-        return editions.stream().map(
-                (e) -> Mapper.map(e, EditionDTO.class)
-        ).toList();
+        return editions.stream().map(EditionDTO::toDTO).toList();
     }
 
     private Edition findById(Long id){

@@ -1,6 +1,8 @@
 package au.com.library.book.dto;
 
 import au.com.library.book.entity.BookFormat;
+import au.com.library.book.entity.Edition;
+import au.com.library.shared.util.Mapper;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,4 +35,17 @@ public class EditionDTO {
     private String edition;
     private BookFormat format;
     private Set<EditionCopyDTO> copies = new HashSet<>();
+    private Long bookId;
+
+    /**
+     * Maps an {@link Edition} object to an {@link EditionDTO} object,
+     * also setting the {@link #getBookId() bookId} attribute from its {@link Edition#getBook() book reference}.
+     * @param edition The source {@link Edition} object.
+     * @return The created {@link EditionDTO} object.
+     */
+    public static EditionDTO toDTO(Edition edition){
+        EditionDTO editionDTO = Mapper.map(edition, EditionDTO.class);
+        editionDTO.setBookId(edition.getBook().getId());
+        return editionDTO;
+    }
 }
