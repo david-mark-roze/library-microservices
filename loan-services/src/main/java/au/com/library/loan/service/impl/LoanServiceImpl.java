@@ -42,13 +42,12 @@ public class LoanServiceImpl implements LoanService {
     @Override
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
 
-        EditionCopySnapshotDTO copy = bookClient.findEditionCopy(loanRequestDTO.getEditionId(), loanRequestDTO.getEditionCopyId());
+        EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.getEditionCopyId());
         if(!copy.getStatus().isAvailable()) {
             throw new CopyUnavailableException("The copy of the book requested is unavailable");
         }
-
         MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.getMemberId());
-        EditionSnapshotDTO edition = bookClient.findEdition(loanRequestDTO.getEditionId());
+        EditionSnapshotDTO edition = bookClient.findEdition(copy.getEditionId());
         BookSnapshotDTO book = bookClient.findBook(edition.getBookId());
 
         Loan loan = Loan.builder().
@@ -65,6 +64,9 @@ public class LoanServiceImpl implements LoanService {
                 build();
         loan.calculateDueDate(loanPeriodDays);
         Loan saved = repository.save(loan);
+
+        // Send a request to the book services system to update its edition copy details.
+        bookClient.borrowCopy(loanRequestDTO.getEditionCopyId());
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
@@ -72,6 +74,8 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDTO returnLoan(Long id) {
         Loan loan = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("The loan with the id %s could not be found"));
         loan.returnLoan();
-        return Mapper.map(repository.save(loan), LoanResponseDTO.class);
+        Loan saved = repository.save(loan);
+        bookClient.returnCopy(saved.getEditionCopyId());
+        return Mapper.map(saved, LoanResponseDTO.class);
     }
 }

@@ -13,4 +13,5 @@ public class EditionCopySnapshotDTO {
 
     private String barcode;
     private EditionCopyStatus status;
+    private Long editionId;
 }

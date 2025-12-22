@@ -6,10 +6,7 @@ import au.com.library.loan.service.LoanService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Handles REST API requests for library book loans.
@@ -30,5 +27,10 @@ public class LoanController {
     @PostMapping
     public ResponseEntity<LoanResponseDTO> createLoan(@RequestBody LoanRequestDTO loanRequestDTO){
         return new ResponseEntity<LoanResponseDTO>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/{id}/return")
+    public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long id){
+        return ResponseEntity.ok(service.returnLoan(id));
     }
 }

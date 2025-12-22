@@ -1,13 +1,11 @@
 package au.com.library.loan.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder

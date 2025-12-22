@@ -10,7 +10,6 @@ import au.com.library.book.service.EditionCopyService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.BarcodeGenerator;
-import au.com.library.shared.util.Mapper;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +37,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
                 barcode(BarcodeGenerator.generate()).
                 build();
         EditionCopy saved = editionCopyRepository.save(copy);
-        return Mapper.map(saved, EditionCopyDTO.class);
+        return EditionCopyDTO.toDTO(saved);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
         if(copy.getStatus().isLoaned()){
             LOGGER.info("The edition copy is already on loan. No update will occur.");
-            return Mapper.map(copy, EditionCopyDTO.class);
+            return EditionCopyDTO.toDTO(copy);
         }
         try {
             copy.markBorrowed();
@@ -54,7 +53,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
             throw new BadRequestException(e.getMessage());
         }
         EditionCopy saved = editionCopyRepository.save(copy);
-        return Mapper.map(saved, EditionCopyDTO.class);
+        return EditionCopyDTO.toDTO(saved);
     }
 
     @Override
@@ -62,7 +61,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
         if(copy.getStatus().isAvailable()){
             LOGGER.info("The edition copy is already available. No update will occur.");
-            return Mapper.map(copy, EditionCopyDTO.class);
+            return EditionCopyDTO.toDTO(copy);
         }
         try {
             copy.markAvailable();
@@ -70,7 +69,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
             throw new BadRequestException(e.getMessage());
         }
         EditionCopy saved = editionCopyRepository.save(copy);
-        return Mapper.map(saved, EditionCopyDTO.class);
+        return EditionCopyDTO.toDTO(saved);
     }
 
     @Override
@@ -78,27 +77,31 @@ public class EditionCopyServiceImpl implements EditionCopyService {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
         if(copy.getStatus().isLost()){
             LOGGER.info("The edition copy is already marked as lost. No update will occur.");
-            return Mapper.map(copy, EditionCopyDTO.class);
+            return EditionCopyDTO.toDTO(copy);
         }
         copy.markLost();
         EditionCopy saved = editionCopyRepository.save(copy);
-        return Mapper.map(saved, EditionCopyDTO.class);
+        return EditionCopyDTO.toDTO(saved);
     }
 
     @Override
     public EditionCopyDTO findCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
-        return Mapper.map(findByIdAndEditionId(copyId, editionId), EditionCopyDTO.class);
+        return EditionCopyDTO.toDTO(findByIdAndEditionId(copyId, editionId));
     }
 
     @Override
     public List<EditionCopyDTO> findCopies(Long editionId) throws ResourceNotFoundException {
         List<EditionCopy> copies = editionCopyRepository.findByEditionId(editionId);
-        return copies.stream().map(
-                copy -> Mapper.map(copy, EditionCopyDTO.class)
-        ).toList();
+        return copies.stream().map(EditionCopyDTO::toDTO).toList();
     }
 
     private EditionCopy findByIdAndEditionId(Long copyId, Long editionId){
+        if(editionId == null){
+            return editionCopyRepository.findById(copyId).orElseThrow(
+                    ()-> new ResourceNotFoundException(String.format("The edition copy with the copy id %s could not be found", copyId)
+                    )
+            );
+        }
         return editionCopyRepository.findByIdAndEditionId(copyId, editionId).orElseThrow(
                 ()-> new ResourceNotFoundException(String.format("The edition copy with the copy id %s and edition id %s could not be found", copyId, editionId)
                 )

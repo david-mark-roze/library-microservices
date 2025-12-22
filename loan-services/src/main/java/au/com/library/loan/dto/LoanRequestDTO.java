@@ -11,7 +11,6 @@ import lombok.Setter;
 @Setter
 public class LoanRequestDTO {
 
-    private Long editionId;
     private Long editionCopyId;
     private Long memberId;
 }
