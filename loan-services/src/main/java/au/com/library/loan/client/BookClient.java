@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
  */
 @FeignClient(
         name="book-services",
-        url = "${services.books.base-url}",
         configuration = ClientErrorDecoderConfig.class
 )
 public interface BookClient {

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 @FeignClient(
         name="member-services",
-        url = "${services.members.base-url}",
         configuration = ClientErrorDecoderConfig.class
 )
 public interface MemberClient {

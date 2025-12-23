@@ -7,8 +7,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="service-registry" />
       </profile>
-      <profile name="Annotation profile for loan-services" enabled="true">
+      <profile name="Annotation profile for member-services" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -27,6 +28,7 @@
       <module name="book-services" options="-parameters" />
       <module name="loan-services" options="-parameters" />
       <module name="member-services" options="-parameters" />
+      <module name="service-registry" options="-parameters" />
       <module name="shared" options="-parameters" />
     </option>
   </component>
