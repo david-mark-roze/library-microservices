@@ -2,6 +2,7 @@ package au.com.library.shared.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
  * It may be populated by an exception handler and returned by a REST API request when an exception is thrown.
  */
 @AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class ErrorDetails {
 

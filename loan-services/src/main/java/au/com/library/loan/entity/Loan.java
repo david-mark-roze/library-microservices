@@ -1,5 +1,6 @@
 package au.com.library.loan.entity;
 
+import au.com.library.shared.exception.ConflictException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -70,15 +71,17 @@ public class Loan {
      * Marks a loan as {@link LoanStatus#RETURNED returned} if it is currently
      * {@link LoanStatus#BORROWED borrowed}, {@link LoanStatus#RENEWED renewed} or
      * {@link LoanStatus#OVERDUE overdue} and sets the {@link #getReturnDate() return date}.
+     * @throws ConflictException Thrown when the loan has already been returned.
      * @throws IllegalStateException Thrown when the loan is {@link LoanStatus#LOST}.
      */
     public void returnLoan(){
         if(status.isLost()){
             throw new IllegalStateException("Unable to mark the loan as returned. Its status is lost");
         }
-        if(!status.isReturned()){
-            status = LoanStatus.RETURNED;
-            returnDate = LocalDate.now();
+        if(status.isReturned()){
+            throw new ConflictException(String.format("The loan with id %s has already been returned", id));
         }
+        status = LoanStatus.RETURNED;
+        returnDate = LocalDate.now();
     }
 }

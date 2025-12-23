@@ -3,6 +3,7 @@ package au.com.library.loan.service;
 import au.com.library.loan.dto.LoanRequestDTO;
 import au.com.library.loan.dto.LoanResponseDTO;
 import au.com.library.loan.exception.CopyUnavailableException;
+import au.com.library.shared.exception.ConflictException;
 
 public interface LoanService {
 
@@ -27,5 +28,5 @@ public interface LoanService {
      * @param id The id of the returned loan.
      * @return A {@link LoanResponseDTO} object containing details of the returned loan.
      */
-    LoanResponseDTO returnLoan(Long id);
+    LoanResponseDTO returnLoan(Long id) throws ConflictException;
 }
