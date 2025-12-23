@@ -13,8 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.InputStream;
 
+/**
+ * An {@link ErrorDecoder} implementation for handling exceptions thrown by the book and member services.
+ */
 @Component
 public class ClientErrorDecoder implements ErrorDecoder {
 

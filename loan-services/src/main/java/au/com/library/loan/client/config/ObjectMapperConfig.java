@@ -6,6 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration for the use of the Jackson databind {@link ObjectMapper} object to be used particularly
+ * by the {@link au.com.library.loan.exception.ClientErrorDecoder Feign error decoder} that handles exceptions
+ * thrown by requests to the book and member services.
+ *
+ * @see ObjectMapper
+ * @see au.com.library.loan.exception.ClientErrorDecoder
+ */
 @Configuration
 public class ObjectMapperConfig {
 

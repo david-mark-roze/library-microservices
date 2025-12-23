@@ -69,10 +69,23 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public LoanResponseDTO returnLoan(Long id) throws ConflictException {
-        Loan loan = repository.findById(id).orElseThrow(()-> new ResourceNotFoundException("The loan with the id %s could not be found"));
+        Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = repository.save(loan);
         bookClient.returnCopy(saved.getEditionCopyId());
         return Mapper.map(saved, LoanResponseDTO.class);
+    }
+
+    @Override
+    public LoanResponseDTO find(Long id) throws ResourceNotFoundException {
+        return Mapper.map(findById(id), LoanResponseDTO.class);
+    }
+
+    private Loan findById(Long id){
+        return repository.findById(id).
+                orElseThrow(
+                        ()-> new ResourceNotFoundException(String.format("The loan with the id %s could not be found", id)
+                        )
+                );
     }
 }

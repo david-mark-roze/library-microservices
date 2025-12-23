@@ -22,15 +22,33 @@ public class LoanController {
      * Handles a REST API POST for creating a library book loan.
      *
      * @param loanRequestDTO A {@link LoanRequestDTO} object containing the data required for creating a loan.
-     * @return A {@link LoanResponseDTO} object containing details of the new loan.
+     * @return A {@link ResponseEntity} containing a  {@link LoanResponseDTO} object containing details of the new loan.
      */
     @PostMapping
     public ResponseEntity<LoanResponseDTO> createLoan(@RequestBody LoanRequestDTO loanRequestDTO){
         return new ResponseEntity<LoanResponseDTO>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
     }
-
+    /**
+     * Handles a REST API POST for returning a loan.
+     *
+     * @param id A The id of the loan to return.
+     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * object containing details of the loan returned.
+     */
     @PostMapping("/{id}/return")
     public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long id){
         return ResponseEntity.ok(service.returnLoan(id));
+    }
+
+    /**
+     * Handles a REST API GET to find {@link au.com.library.loan.entity.Loan loan} by its
+     * unique id.
+     * @param id The loan id.
+     * @return A {@link ResponseEntity} object containing a {@link LoanResponseDTO} object containing
+     * the details of the returned loan.
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<LoanResponseDTO> findLoan(@PathVariable Long id){
+        return ResponseEntity.ok(service.find(id));
     }
 }
