@@ -5,6 +5,7 @@ import au.com.library.book.dto.EditionDTO;
 import au.com.library.book.service.BookService;
 import au.com.library.book.service.EditionService;
 import lombok.AllArgsConstructor;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
