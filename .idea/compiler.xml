@@ -9,13 +9,14 @@
         <outputRelativeToContentRoot value="true" />
         <module name="service-registry" />
       </profile>
-      <profile name="Annotation profile for member-services" enabled="true">
+      <profile name="Annotation profile for api-gateway" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.42/lombok-1.18.42.jar" />
         </processorPath>
+        <module name="api-gateway" />
         <module name="shared" />
         <module name="member-services" />
         <module name="loan-services" />
@@ -25,6 +26,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="api-gateway" options="-parameters" />
       <module name="book-services" options="-parameters" />
       <module name="loan-services" options="-parameters" />
       <module name="member-services" options="-parameters" />

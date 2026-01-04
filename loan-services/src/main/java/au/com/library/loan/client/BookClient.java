@@ -29,7 +29,7 @@ public interface BookClient {
     EditionCopySnapshotDTO findCopy(@PathVariable Long id);
 
     @PostMapping("/api/copies/{id}/borrow")
-    LoanResponseDTO borrowCopy(@PathVariable Long id);
+    EditionCopySnapshotDTO borrowCopy(@PathVariable Long id);
 
     @PostMapping("/api/copies/{id}/return")
     EditionCopySnapshotDTO returnCopy(@PathVariable Long id);
