@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # ----------------------------
+            # Book Services
+            # ----------------------------
+            - id: book-services
+              uri: lb://book-services
+              predicates:
+                - name: Path
+                  args:
+                    patterns:
+                      - /api/books/**
+                      - /api/editions/**
+                      - /api/copies/**
+
+            # ----------------------------
+            # Member Services
+            # ----------------------------
+            - id: member-services
+              uri: lb://member-services
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /api/members/**
+
+            # ----------------------------
+            # Loan Services
+            # ----------------------------
+            - id: loan-services
+              uri: lb://loan-services
+              predicates:
+                - name: Path
+                  args:
+                    pattern: /api/loans/**
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+management:
+  service:
+    endpoints:
+      web:
+        exposure:
+          include:
+            - health
+            - info
+            - gateway
+server:
+  port: 9191
