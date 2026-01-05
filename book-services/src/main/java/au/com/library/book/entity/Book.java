@@ -32,7 +32,7 @@ public class Book {
     @Column(nullable = false)
     private String author;
 
-    // Bi-directional one-to-many where the child Element objects reference the parent
+    // Bidirectional one-to-many where the child Element objects reference the parent
     // Book by the name 'book'.
     @OneToMany(mappedBy = "book", fetch = FetchType.LAZY)
     private Set<Edition> editions = new HashSet<>();

@@ -44,7 +44,7 @@ public class Edition {
     @Column(nullable = false, length = LENGTH_EDITION)
     private String edition;
 
-    // Bi-directional many to one - This child Edition references its parent Book via
+    // Bidirectional many to one - This child Edition references its parent Book via
     // the 'book_id' foreign key. In the parent, this is the 'id' column.
     @JoinColumn(name = "book_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -54,7 +54,7 @@ public class Edition {
     @Enumerated(EnumType.STRING)
     private BookFormat format;
 
-    // Bi-directional one-to-many where the child ElementCopy objects reference the parent
+    // Bidirectional one-to-many where the child ElementCopy objects reference the parent
     // Edition by the name 'edition'.
     @OneToMany(mappedBy = "edition", fetch = FetchType.LAZY)
     private Set<EditionCopy> copies = new HashSet<>();
