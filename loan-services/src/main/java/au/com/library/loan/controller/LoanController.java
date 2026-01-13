@@ -41,6 +41,20 @@ public class LoanController {
     }
 
     /**
+     * Handles a REST API POST for renewing a loan.
+     *
+     * @see au.com.library.loan.service.LoanService#renewLoan(Long)
+     *
+     * @param id A The id of the loan to renew.
+     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * object containing details of the renewed loan.
+     */
+    @PostMapping("/{id}/renew")
+    public ResponseEntity<LoanResponseDTO> renewLoan(@PathVariable Long id){
+        return ResponseEntity.ok(service.renewLoan(id));
+    }
+
+    /**
      * Handles a REST API GET to find {@link au.com.library.loan.entity.Loan loan} by its
      * unique id.
      * @param id The loan id.

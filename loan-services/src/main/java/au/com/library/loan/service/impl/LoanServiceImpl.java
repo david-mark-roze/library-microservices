@@ -36,6 +36,9 @@ public class LoanServiceImpl implements LoanService {
     @Value("${loan.period-days}")
     private int loanPeriodDays;
 
+    @Value("${renewal.limit}")
+    private int renewalLimit;
+
     @Override
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
 
@@ -65,6 +68,20 @@ public class LoanServiceImpl implements LoanService {
         // Send a request to the book services system to update its edition copy details.
         bookClient.borrowCopy(loanRequestDTO.getEditionCopyId());
         return Mapper.map(saved, LoanResponseDTO.class);
+    }
+
+    @Override
+    public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException {
+        Loan loan = findById(id);
+        if(!loan.isRenewable()){
+            throw new ConflictException(String.format("Only loans with status %s or %s can be renewed",
+                    LoanStatus.BORROWED, LoanStatus.RENEWED));
+        }
+        if(loan.getRenewalCount() >= renewalLimit){
+            throw new ConflictException("The maximum number of renewals has been reached for this loan");
+        }
+        Loan renewed = repository.save(loan);
+        return Mapper.map(renewed, LoanResponseDTO.class);
     }
 
     @Override

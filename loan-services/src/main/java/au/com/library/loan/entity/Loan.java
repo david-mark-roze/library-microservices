@@ -48,6 +48,9 @@ public class Loan {
     private LocalDate dueDate;
 
     @Setter
+    private int renewalCount;
+
+    @Setter
     private LocalDate returnDate;
 
     @Setter
@@ -58,7 +61,7 @@ public class Loan {
     /**
      * Calculates the {@link #getDueDate() due date} of based on the specified relative number of days from the loan date.
      * @param loanPeriodDays The number of days from the loan date to calculate the due date.
-     * @throws IllegalStateException Thrown if
+     * @throws IllegalStateException Thrown if no loan date has been set.
      */
     public void calculateDueDate(int loanPeriodDays){
         if(loanDate == null){
@@ -83,5 +86,31 @@ public class Loan {
         }
         status = LoanStatus.RETURNED;
         returnDate = LocalDate.now();
+    }
+
+    /**
+     * Handles the renewal of a loan. Only {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed} loans may be renewed. The {@link #getDueDate() due date} will be extended by the specified number of days.
+     *
+     * @param loanPeriodDays The number of days to extend the due date by.
+     * @throws ConflictException Thrown when the loan is not in a state that allows renewal.
+     */
+    public void renewLoan(int loanPeriodDays){
+        // Only borrowed or renewed loans may be renewed.
+        if(isRenewable()){
+            dueDate = dueDate.plusDays(loanPeriodDays);
+            if(status.isBorrowed()){
+                status = LoanStatus.RENEWED;
+            }
+            renewalCount++;
+        }
+        throw new ConflictException(String.format("The loan with id %s cannot be renewed. Its status is %s", id, status));
+    }
+
+    /**
+     * Determines if this loan is in a state that allows renewal.
+     * @return true if the loan is {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed}; false otherwise.
+     */
+    public boolean isRenewable(){
+        return (status.isBorrowed() || status.isRenewed());
     }
 }

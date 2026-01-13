@@ -25,6 +25,15 @@ public interface LoanService {
     LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException;
 
     /**
+     * Handles the renewal of an existing loan. A renewal may only be performed if the loan is current (i.e {@link au.com.library.loan.entity.LoanStatus#BORROWED borrowed} or
+     * {@link#LoanStatus#RENEWED renewed}) and has not exceeded the maximum number of renewals.
+     * @param id The id of the loan to renew.
+     * @return A {@link LoanResponseDTO} object containing details of the renewed loan.
+     * @throws ConflictException Thrown when the loan is not in a state that allows renewal or has exceeded the maximum number of renewals.
+     */
+    LoanResponseDTO renewLoan(Long id) throws ConflictException;
+
+    /**
      * Handles the returning of a loan. The {@link au.com.library.loan.entity.LoanStatus} will be changed to {@link au.com.library.loan.entity.LoanStatus#RETURNED returned} and populated with a return date.
      * @param id The id of the returned loan.
      * @return A {@link LoanResponseDTO} object containing details of the returned loan.
