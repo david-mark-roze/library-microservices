@@ -76,19 +76,22 @@ public class Loan {
     /**
      * Calculates the {@link #getDueDate() due date} of based on the specified relative number of days from the loan date.
      * @param loanPeriodDays The number of days from the loan date to calculate the due date.
-     * @throws IllegalStateException Thrown if no loan date has been set.
+     * @throws IllegalArgumentException Thrown if the specified loan period days is less than or equal to zero.
+     * @throws IllegalStateException Thrown if no loan date has been set or the due date cannot be calculated.
      */
     public void calculateDueDate(int loanPeriodDays){
+        if(loanPeriodDays <= 0){
+            throw new IllegalArgumentException("The loan period days must be greater than zero");
+        }
         if(loanDate == null){
-            throw new IllegalStateException("The due date has not been set");
+            throw new IllegalStateException("The loan date has not been set. Unable to calculate due date");
         }
         dueDate = loanDate.plusDays(loanPeriodDays);
     }
 
     /**
      * Marks a loan as {@link LoanStatus#RETURNED returned} if it is currently
-     * {@link LoanStatus#BORROWED borrowed}, {@link LoanStatus#RENEWED renewed} or
-     * {@link LoanStatus#OVERDUE overdue} and sets the {@link #getReturnDate() return date}.
+     * {@link LoanStatus#BORROWED borrowed}, {@link LoanStatus#RENEWED renewed} and sets the {@link #getReturnDate() return date}.
      * @throws ConflictException Thrown when the loan has already been returned.
      */
     public void returnLoan(){
@@ -107,8 +110,12 @@ public class Loan {
      *
      * @param loanPeriodDays The number of days to extend the due date by.
      * @throws ConflictException Thrown when the loan is not in a state that allows renewal.
+     * @throws IllegalArgumentException Thrown when the specified loan period days is less than or equal to zero.
      */
     public void renewLoan(int loanPeriodDays){
+        if(loanPeriodDays <= 0){
+            throw new IllegalArgumentException("The loan period days must be greater than zero");
+        }
         // Only borrowed or renewed loans may be renewed.
         if (isRenewable()) {
             handleRenewal(loanPeriodDays);
@@ -123,6 +130,14 @@ public class Loan {
      */
     public boolean isRenewable(){
         return (status.isBorrowed() || status.isRenewed());
+    }
+
+    /**
+     * Determines if this loan is overdue.
+     * @return true if the current date is past the {@link #getDueDate() due date} and the loan is {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed}; false otherwise.
+     */
+    public boolean isOverdue(){
+        return dueDate.isBefore(LocalDate.now()) && (status.isBorrowed() || status.isRenewed());
     }
 
     private void handleRenewal(int loanPeriodDays){

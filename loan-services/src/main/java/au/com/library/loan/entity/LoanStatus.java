@@ -2,7 +2,7 @@ package au.com.library.loan.entity;
 
 public enum LoanStatus {
 
-    BORROWED, RETURNED, RENEWED, OVERDUE, LOST;
+    BORROWED, RETURNED, RENEWED, LOST;
 
     public boolean isBorrowed(){
         return BORROWED.equals(this);
@@ -14,10 +14,6 @@ public enum LoanStatus {
 
     public boolean isLost(){
         return LOST.equals(this);
-    }
-
-    public boolean isOverdue(){
-        return OVERDUE.equals(this);
     }
 
     public boolean isRenewed(){
