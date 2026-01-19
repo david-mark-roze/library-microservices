@@ -9,7 +9,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-@Builder
 @Entity
 public class Loan {
 
@@ -57,6 +56,22 @@ public class Loan {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
+
+    @Builder
+    public Loan(Long id, Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
+        this.id = id;
+        this.memberId = memberId;
+        this.memberFirstName = memberFirstName;
+        this.memberLastName = memberLastName;
+        this.editionCopyId = editionCopyId;
+        this.bookTitle = bookTitle;
+        this.author = author;
+        this.edition = edition;
+        this.barcode = barcode;
+        this.loanDate = loanDate;
+        this.returnDate = returnDate;
+        this.status = status;
+    }
 
     /**
      * Calculates the {@link #getDueDate() due date} of based on the specified relative number of days from the loan date.
