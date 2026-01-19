@@ -28,4 +28,5 @@ public class LoanResponseDTO {
     private LocalDate dueDate;
     private LocalDate returnDate;
     private LoanStatus status;
+    private int renewalCount;
 }

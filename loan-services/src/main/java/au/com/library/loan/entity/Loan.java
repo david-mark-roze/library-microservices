@@ -75,11 +75,10 @@ public class Loan {
      * {@link LoanStatus#BORROWED borrowed}, {@link LoanStatus#RENEWED renewed} or
      * {@link LoanStatus#OVERDUE overdue} and sets the {@link #getReturnDate() return date}.
      * @throws ConflictException Thrown when the loan has already been returned.
-     * @throws IllegalStateException Thrown when the loan is {@link LoanStatus#LOST}.
      */
     public void returnLoan(){
         if(status.isLost()){
-            throw new IllegalStateException("Unable to mark the loan as returned. Its status is lost");
+            throw new ConflictException("Unable to mark the loan as returned. Its status is lost");
         }
         if(status.isReturned()){
             throw new ConflictException(String.format("The loan with id %s has already been returned", id));
@@ -96,14 +95,11 @@ public class Loan {
      */
     public void renewLoan(int loanPeriodDays){
         // Only borrowed or renewed loans may be renewed.
-        if(isRenewable()){
-            dueDate = dueDate.plusDays(loanPeriodDays);
-            if(status.isBorrowed()){
-                status = LoanStatus.RENEWED;
-            }
-            renewalCount++;
+        if (isRenewable()) {
+            handleRenewal(loanPeriodDays);
+        } else {
+            throw new ConflictException(String.format("The loan with id %s cannot be renewed. Its status is %s", id, status));
         }
-        throw new ConflictException(String.format("The loan with id %s cannot be renewed. Its status is %s", id, status));
     }
 
     /**
@@ -112,5 +108,13 @@ public class Loan {
      */
     public boolean isRenewable(){
         return (status.isBorrowed() || status.isRenewed());
+    }
+
+    private void handleRenewal(int loanPeriodDays){
+        dueDate = dueDate.plusDays(loanPeriodDays);
+        if (status.isBorrowed()) {
+            status = LoanStatus.RENEWED;
+        }
+        renewalCount++;
     }
 }

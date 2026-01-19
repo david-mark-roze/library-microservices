@@ -80,6 +80,7 @@ public class LoanServiceImpl implements LoanService {
         if(loan.getRenewalCount() >= renewalLimit){
             throw new ConflictException("The maximum number of renewals has been reached for this loan");
         }
+        loan.renewLoan(loanPeriodDays);
         Loan renewed = repository.save(loan);
         return Mapper.map(renewed, LoanResponseDTO.class);
     }
