@@ -58,8 +58,23 @@ public class Loan {
     private LoanStatus status;
 
     @Builder
-    public Loan(Long id, Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
-        this.id = id;
+    /**
+     * Constructs a new Loan entity with the specified parameters.
+     * @param id The unique identifier of the loan.
+     * @param memberId The unique identifier of the member associated with the loan.
+     * @param memberFirstName The first name of the member.
+     * @param memberLastName The last name of the member.
+     * @param editionCopyId The unique identifier of the edition copy being loaned.
+     * @param bookTitle The title of the book being loaned.
+     * @param author The author of the book being loaned.
+     * @param edition The edition of the book being loaned.
+     * @param barcode The barcode of the edition copy being loaned.
+     * @param loanDate The date when the loan was initiated.
+     * @param returnDate The date when the loan was returned.
+     * @param status The current status of the loan.
+     *
+     */
+    public Loan(Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
         this.memberId = memberId;
         this.memberFirstName = memberFirstName;
         this.memberLastName = memberLastName;
