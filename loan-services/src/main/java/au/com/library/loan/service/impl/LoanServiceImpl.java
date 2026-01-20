@@ -101,7 +101,11 @@ public class LoanServiceImpl implements LoanService {
 
     @Override
     public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
-        return null;
+        Loan loan = findById(id);
+        loan.markLost();
+        Loan saved = repository.save(loan);
+        bookClient.markCopyLost(saved.getEditionCopyId());
+        return Mapper.map(saved, LoanResponseDTO.class);
     }
 
     @Override

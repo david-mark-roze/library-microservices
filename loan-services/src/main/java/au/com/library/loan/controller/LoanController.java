@@ -65,4 +65,16 @@ public class LoanController {
     public ResponseEntity<LoanResponseDTO> findLoan(@PathVariable Long id){
         return ResponseEntity.ok(service.find(id));
     }
+
+    /**
+     * Handles a REST API POST to mark a loan as lost.
+     *
+     * @param id The id of the loan to mark as lost.
+     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * object containing details of the lost loan.
+     */
+    @PostMapping("/{id}/lost")
+    public ResponseEntity<LoanResponseDTO> markLost(@PathVariable Long id){
+        return ResponseEntity.ok(service.markLost(id));
+    }
 }

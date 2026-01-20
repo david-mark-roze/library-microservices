@@ -1,5 +1,6 @@
 package au.com.library.book.entity;
 
+import au.com.library.shared.exception.ConflictException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -53,39 +54,46 @@ public class EditionCopy {
 
     /**
      * Marks this copy as being {@link EditionCopyStatus#LOANED on loan}, if it is not already.
-     * @throws IllegalStateException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost}.
+     *
+     * @throws ConflictException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost} or already on loan.
      */
     public void markBorrowed(){
         checkLost();
-        if(status.isAvailable()){
-            status = EditionCopyStatus.LOANED;
+        if(status.isLoaned()){
+            throw new ConflictException("This edition copy is already on loan.");
         }
+        status = EditionCopyStatus.LOANED;
     }
 
     /**
-     * Marks this copy as being {@link EditionCopyStatus#AVAILABLE available} after being returned.
-     * @throws IllegalStateException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost}.
+     * Marks this copy as being {@link EditionCopyStatus#AVAILABLE available}, typically after being returned from a loan.
+     *
+     * @throws ConflictException Thrown when this copy is recorded as {@link EditionCopyStatus#LOST lost} or already available.
      */
     public void markAvailable(){
         checkLost();
-        if(status.isLoaned()){
-            status = EditionCopyStatus.AVAILABLE;
+        if(status.isAvailable()){
+            throw new ConflictException("This edition copy is already available.");
         }
+        status = EditionCopyStatus.AVAILABLE;
     }
 
     /**
      * Marks this copy as being lost i.e. a physical or digital copy no longer exists on
-     * the library premises. This cannot be changed.
+     * the library premises. Once marked as lost, the status of this copy cannot be changed.
+     *
+     * @throws ConflictException Thrown when this copy is already recorded as {@link EditionCopyStatus#LOST lost}.
      */
     public void markLost(){
-        if(!status.isLost()){
-            status = EditionCopyStatus.LOST;
+        if(status.isLost()){
+            throw new ConflictException("The edition copy is already marked as lost.");
         }
+        status = EditionCopyStatus.LOST;
     }
 
     private void checkLost(){
         if(status.isLost()){
-            throw new IllegalStateException("This edition copy is lost. Its status cannot be changed.");
+            throw new ConflictException("This edition copy is lost. Its status cannot be changed.");
         }
     }
 }

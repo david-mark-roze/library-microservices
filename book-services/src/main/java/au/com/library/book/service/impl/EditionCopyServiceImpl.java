@@ -43,15 +43,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     @Override
     public EditionCopyDTO borrowCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        if(copy.getStatus().isLoaned()){
-            LOGGER.info("The edition copy is already on loan. No update will occur.");
-            return EditionCopyDTO.toDTO(copy);
-        }
-        try {
-            copy.markBorrowed();
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
+        copy.markBorrowed();
         EditionCopy saved = editionCopyRepository.save(copy);
         return EditionCopyDTO.toDTO(saved);
     }
@@ -59,15 +51,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     @Override
     public EditionCopyDTO returnCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        if(copy.getStatus().isAvailable()){
-            LOGGER.info("The edition copy is already available. No update will occur.");
-            return EditionCopyDTO.toDTO(copy);
-        }
-        try {
-            copy.markAvailable();
-        } catch (Exception e) {
-            throw new BadRequestException(e.getMessage());
-        }
+        copy.markAvailable();
         EditionCopy saved = editionCopyRepository.save(copy);
         return EditionCopyDTO.toDTO(saved);
     }
@@ -75,10 +59,6 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     @Override
     public EditionCopyDTO markCopyLost(Long editionId, Long copyId) throws ResourceNotFoundException {
         EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        if(copy.getStatus().isLost()){
-            LOGGER.info("The edition copy is already marked as lost. No update will occur.");
-            return EditionCopyDTO.toDTO(copy);
-        }
         copy.markLost();
         EditionCopy saved = editionCopyRepository.save(copy);
         return EditionCopyDTO.toDTO(saved);
