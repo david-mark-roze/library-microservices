@@ -40,19 +40,23 @@ public class Loan {
     @Column(nullable = false)
     private String barcode;
 
+    /**
+     * Set to the current date when the loan is created.
+     */
     @Column(nullable = false)
     private LocalDate loanDate;
 
     @Column(nullable = false)
     private LocalDate dueDate;
 
-    @Setter
+    /**
+     * Number of times the loan has been renewed. Will have an initial value of 0.
+     */
+    @Column(nullable = false)
     private int renewalCount;
 
-    @Setter
     private LocalDate returnDate;
 
-    @Setter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
@@ -69,12 +73,10 @@ public class Loan {
      * @param author The author of the book being loaned.
      * @param edition The edition of the book being loaned.
      * @param barcode The barcode of the edition copy being loaned.
-     * @param loanDate The date when the loan was initiated.
      * @param returnDate The date when the loan was returned.
-     * @param status The current status of the loan.
      *
      */
-    public Loan(Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
+    public Loan(Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode) {
         this.memberId = memberId;
         this.memberFirstName = memberFirstName;
         this.memberLastName = memberLastName;
@@ -83,23 +85,19 @@ public class Loan {
         this.author = author;
         this.edition = edition;
         this.barcode = barcode;
-        this.loanDate = loanDate;
-        this.returnDate = returnDate;
-        this.status = status;
+        this.status = LoanStatus.BORROWED;
+        this.loanDate = LocalDate.now();
+        this.renewalCount = 0;
     }
 
     /**
      * Calculates the {@link #getDueDate() due date} of based on the specified relative number of days from the loan date.
      * @param loanPeriodDays The number of days from the loan date to calculate the due date.
      * @throws IllegalArgumentException Thrown if the specified loan period days is less than or equal to zero.
-     * @throws IllegalStateException Thrown if no loan date has been set or the due date cannot be calculated.
      */
     public void calculateDueDate(int loanPeriodDays){
         if(loanPeriodDays <= 0){
             throw new IllegalArgumentException("The loan period days must be greater than zero");
-        }
-        if(loanDate == null){
-            throw new IllegalStateException("The loan date has not been set. Unable to calculate due date");
         }
         dueDate = loanDate.plusDays(loanPeriodDays);
     }
@@ -121,7 +119,9 @@ public class Loan {
     }
 
     /**
-     * Handles the renewal of a loan. Only {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed} loans may be renewed. The {@link #getDueDate() due date} will be extended by the specified number of days.
+     * Handles the renewal of a loan. This includes {@link LoanStatus#BORROWED borrowed} and {@link LoanStatus#RENEWED renewed} loans,
+     * where, with the latter, the loan may be extended while still under renewal.
+     * The {@link #getDueDate() due date} will be extended by the specified number of days.
      *
      * @param loanPeriodDays The number of days to extend the due date by.
      * @throws ConflictException Thrown when the loan is not in a state that allows renewal.
@@ -131,8 +131,7 @@ public class Loan {
         if(loanPeriodDays <= 0){
             throw new IllegalArgumentException("The loan period days must be greater than zero");
         }
-        // Only borrowed or renewed loans may be renewed.
-        if (isRenewable()) {
+        if (getStatus().isActive()) {
             handleRenewal(loanPeriodDays);
         } else {
             throw new ConflictException(String.format("The loan with id %s cannot be renewed. Its status is %s", id, status));
@@ -140,19 +139,27 @@ public class Loan {
     }
 
     /**
-     * Determines if this loan is in a state that allows renewal.
-     * @return true if the loan is {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed}; false otherwise.
+     * Determines if this loan is overdue.
+     *
+     * @return true if the current date is past the {@link #getDueDate() due date} and the loan is {@link LoanStatus#isActive() active}; false otherwise.
      */
-    public boolean isRenewable(){
-        return (status.isBorrowed() || status.isRenewed());
+    public boolean isOverdue(){
+        return dueDate.isBefore(LocalDate.now()) && (status.isActive());
     }
 
     /**
-     * Determines if this loan is overdue.
-     * @return true if the current date is past the {@link #getDueDate() due date} and the loan is {@link LoanStatus#BORROWED borrowed} or {@link LoanStatus#RENEWED renewed}; false otherwise.
+     * Marks a loan as {@link LoanStatus#LOST lost} when it has been determined to be overdue for a significant period.
+     *
+     * @throws ConflictException Thrown when the loan is already marked as lost or is not overdue.
      */
-    public boolean isOverdue(){
-        return dueDate.isBefore(LocalDate.now()) && (status.isBorrowed() || status.isRenewed());
+    public void markLost() {
+        if(getStatus().isLost()){
+            throw new ConflictException("The loan has already been marked as lost");
+        }
+        if(!isOverdue()){
+            throw new ConflictException("Only overdue loans  can be marked as lost");
+        }
+        this.status = LoanStatus.LOST;
     }
 
     private void handleRenewal(int loanPeriodDays){

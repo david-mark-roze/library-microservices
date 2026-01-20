@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * The {@link LoanService} implementation.
@@ -59,8 +60,6 @@ public class LoanServiceImpl implements LoanService {
                 memberId(member.getId()).
                 memberFirstName(member.getFirstName()).
                 memberLastName(member.getLastName()).
-                loanDate(LocalDate.now()).
-                status(LoanStatus.BORROWED).
                 build();
         loan.calculateDueDate(loanPeriodDays);
         Loan saved = repository.save(loan);
@@ -71,9 +70,15 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException {
+    public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
+        validateId(id);
+        try {
+            Objects.requireNonNull(id, "The loan id parameter must not be null");
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage());
+        }
         Loan loan = findById(id);
-        if(!loan.isRenewable()){
+        if(!loan.getStatus().isActive()){
             throw new ConflictException(String.format("Only loans with status %s or %s can be renewed",
                     LoanStatus.BORROWED, LoanStatus.RENEWED));
         }
@@ -86,7 +91,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponseDTO returnLoan(Long id) throws ConflictException {
+    public LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = repository.save(loan);
@@ -95,11 +100,23 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
-    public LoanResponseDTO find(Long id) throws ResourceNotFoundException {
+    public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
+        return null;
+    }
+
+    @Override
+    public LoanResponseDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException {
         return Mapper.map(findById(id), LoanResponseDTO.class);
     }
 
+    private void validateId(Long id){
+        if(id == null || id <= 0){
+            throw new IllegalArgumentException("The loan id must be a positive non-zero value");
+        }
+    }
+
     private Loan findById(Long id){
+        validateId(id);
         return repository.findById(id).
                 orElseThrow(
                         ()-> new ResourceNotFoundException(String.format("The loan with the id %s could not be found", id)
