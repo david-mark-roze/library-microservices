@@ -6,37 +6,34 @@ import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
 import au.com.library.loan.exception.CopyUnavailableException;
+import au.com.library.loan.kafka.event.LoanCreatedEvent;
+import au.com.library.loan.kafka.event.LoanEventContext;
+import au.com.library.loan.kafka.event.LoanLostEvent;
+import au.com.library.loan.kafka.event.LoanReturnedEvent;
 import au.com.library.loan.repository.LoanRepository;
 import au.com.library.loan.service.LoanService;
 import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.Mapper;
-import org.apache.kafka.clients.admin.NewTopic;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Objects;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The {@link LoanService} implementation.
  */
+@RequiredArgsConstructor
 @Service
 public class LoanServiceImpl implements LoanService {
 
-    private BookClient bookClient;
-    private MemberClient memberClient;
+    private final BookClient bookClient;
+    private final MemberClient memberClient;
 
-    private NewTopic loanReturn;
+    private final ApplicationEventPublisher eventPublisher;
 
-    private LoanRepository repository;
-
-    public LoanServiceImpl(BookClient bookClient, MemberClient memberClient, NewTopic loanReturn, LoanRepository repository) {
-        this.bookClient = bookClient;
-        this.memberClient = memberClient;
-        this.loanReturn = loanReturn;
-        this.repository = repository;
-    }
+    private final LoanRepository repository;
 
     @Value("${loan.period-days}")
     private int loanPeriodDays;
@@ -45,6 +42,7 @@ public class LoanServiceImpl implements LoanService {
     private int renewalLimit;
 
     @Override
+    @Transactional
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
 
         EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.getEditionCopyId());
@@ -69,18 +67,14 @@ public class LoanServiceImpl implements LoanService {
         Loan saved = repository.save(loan);
 
         // Send a request to the book services system to update its edition copy details.
-        bookClient.borrowCopy(loanRequestDTO.getEditionCopyId());
+        //bookClient.borrowCopy(loanRequestDTO.getEditionCopyId());
+        eventPublisher.publishEvent(loanCreatedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
     @Override
     public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         validateId(id);
-        try {
-            Objects.requireNonNull(id, "The loan id parameter must not be null");
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage());
-        }
         Loan loan = findById(id);
         if(!loan.getStatus().isActive()){
             throw new ConflictException(String.format("Only loans with status %s or %s can be renewed",
@@ -95,26 +89,48 @@ public class LoanServiceImpl implements LoanService {
     }
 
     @Override
+    @Transactional
     public LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = repository.save(loan);
-        bookClient.returnCopy(saved.getEditionCopyId());
+        //bookClient.returnCopy(saved.getEditionCopyId());
+        eventPublisher.publishEvent(loanReturnedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
     @Override
+    @Transactional
     public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.markLost();
         Loan saved = repository.save(loan);
-        bookClient.markCopyLost(saved.getEditionCopyId());
+        //bookClient.markCopyLost(saved.getEditionCopyId());
+        eventPublisher.publishEvent(loanLostEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
     @Override
     public LoanResponseDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException {
         return Mapper.map(findById(id), LoanResponseDTO.class);
+    }
+
+    private LoanCreatedEvent loanCreatedEvent(Loan loan){
+        return new LoanCreatedEvent(loanEventContext(loan));
+    }
+
+    private LoanReturnedEvent loanReturnedEvent(Loan loan){
+        return new LoanReturnedEvent(loanEventContext(loan));
+    }
+
+    private LoanLostEvent loanLostEvent(Loan loan){
+        return new LoanLostEvent(loanEventContext(loan));
+    }
+
+    private LoanEventContext loanEventContext(Loan loan){
+        return LoanEventContext.builder().loanId(loan.getId()).
+                editionCopyId(loan.getEditionCopyId()).
+                memberId(loan.getMemberId()).build();
     }
 
     private void validateId(Long id){

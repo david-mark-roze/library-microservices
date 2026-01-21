@@ -1,4 +1,4 @@
-package au.com.library.loan.config;
+package au.com.library.loan.kafka;
 
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,7 +10,7 @@ import org.springframework.kafka.config.TopicBuilder;
  * Configuration class for Kafka topic setup.
  */
 @Configuration
-public class KafkaTopicConfig {
+public class LoanTopicConfig {
 
     @Value("${spring.kafka.topic.loan-create}")
     private String loanCreateTopic;
