@@ -12,8 +12,14 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
+    @Value("${spring.kafka.topic.loan-create}")
+    private String loanCreateTopic;
+
     @Value("${spring.kafka.topic.loan-return}")
-    private String loanReturn;
+    private String loanReturnTopic;
+
+    @Value("${spring.kafka.topic.loan-lost}")
+    private String loanLostTopic;
 
     /**
      * Creates a Kafka topic for loan returns.
@@ -21,7 +27,27 @@ public class KafkaTopicConfig {
      * @return a NewTopic instance representing the loan return topic.
      */
     @Bean
-    public NewTopic loanReturn() {
-        return TopicBuilder.name(loanReturn).build();
+    public NewTopic loanReturnTopic() {
+        return TopicBuilder.name(loanReturnTopic).build();
+    }
+
+    /**
+     * Creates a Kafka topic for loan creation.
+     *
+     * @return a NewTopic instance representing the loan creation topic.
+     */
+    @Bean
+    public NewTopic loanCreateTopic() {
+        return TopicBuilder.name(loanCreateTopic).build();
+    }
+
+    /**
+     * Creates a Kafka topic for lost loans.
+     *
+     * @return a NewTopic instance representing the loan lost topic.
+     */
+    @Bean
+    public NewTopic loanLostTopic() {
+        return TopicBuilder.name(loanLostTopic).build();
     }
 }
