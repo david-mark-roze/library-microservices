@@ -11,6 +11,7 @@ import au.com.library.loan.service.LoanService;
 import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.Mapper;
+import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +27,14 @@ public class LoanServiceImpl implements LoanService {
     private BookClient bookClient;
     private MemberClient memberClient;
 
+    private NewTopic loanReturn;
+
     private LoanRepository repository;
 
-    public LoanServiceImpl(BookClient bookClient, MemberClient memberClient, LoanRepository repository) {
+    public LoanServiceImpl(BookClient bookClient, MemberClient memberClient, NewTopic loanReturn, LoanRepository repository) {
         this.bookClient = bookClient;
         this.memberClient = memberClient;
+        this.loanReturn = loanReturn;
         this.repository = repository;
     }
 
