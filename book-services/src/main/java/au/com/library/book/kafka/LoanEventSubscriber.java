@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanEventSubscriber {
 
-    private static final String EVENT_TYPE = "eventType";
-
     private final EditionCopyService service;
     private final ObjectMapper objectMapper;
 
@@ -21,7 +19,7 @@ public class LoanEventSubscriber {
             topics = "${spring.kafka.topic.loan-event}",
             groupId = "${spring.kafka.consumer.group-id}"
     )
-    public void handleEvent(@Payload LoanEvent eventPayload) {
+    public void subscribe(@Payload LoanEvent eventPayload) {
         if(eventPayload == null){
             throw new IllegalArgumentException("The event payload cannot be null");
         }
