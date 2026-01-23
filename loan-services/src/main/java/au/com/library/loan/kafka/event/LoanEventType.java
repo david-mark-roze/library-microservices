@@ -11,10 +11,6 @@ public enum LoanEventType {
      */
     LOAN_CREATED("loan-created"),
     /**
-     * Event type for when a loan is renewed.
-     */
-    LOAN_RENEWED("loan-renewed"),
-    /**
      * Event type for when a loan is returned.
      */
     LOAN_RETURNED("loan-returned"),
@@ -27,19 +23,5 @@ public enum LoanEventType {
 
     private LoanEventType(String value) {
         this.value = value;
-    }
-
-    /**
-     * Retrieves the string value associated with the event type.
-     *
-     * @return The string value of the event type.
-     */
-    public String getValue() {
-        return value;
-    }
-
-    @Override
-    public String toString() {
-        return value;
     }
 }

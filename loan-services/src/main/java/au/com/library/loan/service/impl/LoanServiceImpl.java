@@ -6,10 +6,7 @@ import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
 import au.com.library.loan.exception.CopyUnavailableException;
-import au.com.library.loan.kafka.event.LoanCreatedEvent;
-import au.com.library.loan.kafka.event.LoanEventContext;
-import au.com.library.loan.kafka.event.LoanLostEvent;
-import au.com.library.loan.kafka.event.LoanReturnedEvent;
+import au.com.library.loan.kafka.event.*;
 import au.com.library.loan.repository.LoanRepository;
 import au.com.library.loan.service.LoanService;
 import au.com.library.shared.exception.ConflictException;
@@ -20,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static au.com.library.loan.kafka.event.LoanEventType.*;
 
 /**
  * The {@link LoanService} implementation.
@@ -111,16 +110,16 @@ public class LoanServiceImpl implements LoanService {
         return Mapper.map(findById(id), LoanResponseDTO.class);
     }
 
-    private LoanCreatedEvent loanCreatedEvent(Loan loan){
-        return new LoanCreatedEvent(loanEventContext(loan));
+    private LoanEvent loanCreatedEvent(Loan loan){
+        return new LoanEvent(LOAN_CREATED,loanEventContext(loan));
     }
 
-    private LoanReturnedEvent loanReturnedEvent(Loan loan){
-        return new LoanReturnedEvent(loanEventContext(loan));
+    private LoanEvent loanReturnedEvent(Loan loan){
+        return new LoanEvent(LOAN_RETURNED, loanEventContext(loan));
     }
 
-    private LoanLostEvent loanLostEvent(Loan loan){
-        return new LoanLostEvent(loanEventContext(loan));
+    private LoanEvent loanLostEvent(Loan loan){
+        return new LoanEvent(LOAN_MARKED_LOST, loanEventContext(loan));
     }
 
     private LoanEventContext loanEventContext(Loan loan){
