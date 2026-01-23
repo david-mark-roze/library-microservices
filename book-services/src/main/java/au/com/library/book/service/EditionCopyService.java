@@ -24,41 +24,37 @@ public interface EditionCopyService {
 
     /**
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#LOANED on loan}.
-     * @param editionId The id of the associated edition details.
      * @param copyId The id of the edition copy being borrowed.
      * @return An {@link EditionCopyDTO} object containing the details of the borrowed copy.
      * @throws ResourceNotFoundException Thrown when the edition copy to be borrowed could not be found.
      */
-    EditionCopyDTO borrowCopy(Long editionId, Long copyId) throws ResourceNotFoundException;
+    void borrowCopy(Long copyId) throws ResourceNotFoundException;
 
     /**
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#AVAILABLE available}
      * after it has been returned.
-     * @param editionId The id of the associated edition details.
      * @param copyId The id of the edition copy being returned.
      * @return An {@link EditionCopyDTO} object containing the details of the returned copy.
      * @throws ResourceNotFoundException Thrown when details of the edition copy being returned could not be found in the system.
      */
-    EditionCopyDTO returnCopy(Long editionId, Long copyId) throws ResourceNotFoundException;
+    void returnCopy(Long copyId) throws ResourceNotFoundException;
 
     /**
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#LOST lost}
      * and therefore no longer available.
-     * @param editionId The id of the associated edition details.
      * @param copyId The id of the lost edition copy.
      * @return An {@link EditionCopyDTO} object containing the details of being marked as lost.
      * @throws ResourceNotFoundException Thrown when details of the lost edition copy could not be found in the system.
      */
-    EditionCopyDTO markCopyLost(Long editionId, Long copyId) throws ResourceNotFoundException;
+    void markCopyLost(Long copyId) throws ResourceNotFoundException;
 
     /**
      * Handles the retrieval of a single set of edition copy details.
-     * @param editionId The id of the edition linked to the copy.
      * @param copyId The id of the edition copy.
      * @return An {@link EditionCopyDTO} object containing the edition copy details.
      * @throws ResourceNotFoundException Thrown when either the edition or edition copy could not be found.
      */
-    EditionCopyDTO findCopy(Long editionId, Long copyId) throws ResourceNotFoundException;
+    EditionCopyDTO findCopy(Long copyId) throws ResourceNotFoundException;
 
     /**
      * Handles the retrieval of all {@link au.com.library.book.entity.EditionCopy copies} of an {@link au.com.library.book.entity.Edition edition}.

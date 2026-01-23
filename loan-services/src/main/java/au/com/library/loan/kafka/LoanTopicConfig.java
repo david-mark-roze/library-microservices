@@ -1,5 +1,6 @@
 package au.com.library.loan.kafka;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -12,42 +13,21 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class LoanTopicConfig {
 
-    @Value("${spring.kafka.topic.loan-create}")
-    private String loanCreateTopic;
-
-    @Value("${spring.kafka.topic.loan-return}")
-    private String loanReturnTopic;
-
-    @Value("${spring.kafka.topic.loan-lost}")
-    private String loanLostTopic;
+    @Value("${spring.kafka.topic.loan-event}")
+    private String loanEventTopic;
 
     /**
-     * Creates a Kafka topic for loan returns.
+     * Creates a Kafka topic for loan events.
      *
-     * @return a NewTopic instance representing the loan return topic.
+     * @return a NewTopic instance representing the loan event topic.
      */
     @Bean
-    public NewTopic loanReturnTopic() {
-        return TopicBuilder.name(loanReturnTopic).build();
+    public NewTopic loanEventTopic() {
+        return TopicBuilder.name(loanEventTopic).build();
     }
 
-    /**
-     * Creates a Kafka topic for loan creation.
-     *
-     * @return a NewTopic instance representing the loan creation topic.
-     */
-    @Bean
-    public NewTopic loanCreateTopic() {
-        return TopicBuilder.name(loanCreateTopic).build();
-    }
-
-    /**
-     * Creates a Kafka topic for lost loans.
-     *
-     * @return a NewTopic instance representing the loan lost topic.
-     */
-    @Bean
-    public NewTopic loanLostTopic() {
-        return TopicBuilder.name(loanLostTopic).build();
+    @PostConstruct
+    void logTopic() {
+        System.out.println("Loan event topic = " + loanEventTopic);
     }
 }

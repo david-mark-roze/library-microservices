@@ -7,6 +7,8 @@ import au.com.library.loan.kafka.event.LoanReturnedEvent;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.KafkaHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -19,11 +21,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class LoanEventPublisher {
 
-    private final KafkaTemplate<String, Object> template;
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoanEventPublisher.class);
 
-    private final NewTopic loanReturnTopic;
-    private final NewTopic loanCreateTopic;
-    private final NewTopic loanLostTopic;
+    private final KafkaTemplate<String, Object> template;
+    private final NewTopic loanEventTopic;
 
     /**
      * Publishes a {@link LoanReturnedEvent loan returned event} to the loan return topic.
@@ -32,7 +33,7 @@ public class LoanEventPublisher {
      * @throws IllegalArgumentException Thrown if the key is null or blank, or if the event is null.
      */
    public void publish(String key, LoanReturnedEvent event) {
-        publish(loanReturnTopic, key, event, LoanEventType.LOAN_RETURNED);
+        publish(key, event, LoanEventType.LOAN_RETURNED);
     }
 
     /**
@@ -42,7 +43,7 @@ public class LoanEventPublisher {
      * @throws IllegalArgumentException Thrown if the key is null or blank, or if the event is null.
      */
     public void publish(String key, LoanCreatedEvent event) {
-        publish(loanCreateTopic, key, event, LoanEventType.LOAN_CREATED);
+        publish(key, event, LoanEventType.LOAN_CREATED);
     }
 
     /**
@@ -52,10 +53,10 @@ public class LoanEventPublisher {
      * @throws IllegalArgumentException Thrown if the key is null or blank, or if the event is null.
      */
     public void publish(String key, LoanLostEvent event) {
-        publish(loanLostTopic, key, event, LoanEventType.LOAN_MARKED_LOST);
+        publish(key, event, LoanEventType.LOAN_MARKED_LOST);
     }
 
-    private void publish(NewTopic topic, String key, Object event, LoanEventType eventType) {
+    private void publish(String key, Object event, LoanEventType eventType) {
         if(StringUtils.isBlank(key)){
             throw new IllegalArgumentException("The message key cannot be null or blank");
         }
@@ -63,11 +64,15 @@ public class LoanEventPublisher {
             throw new IllegalArgumentException("The event to publish cannot be null");
         }
         var message = MessageBuilder.withPayload(event).
-                setHeader(KafkaHeaders.TOPIC, topic.name()).
+                setHeader(KafkaHeaders.TOPIC, loanEventTopic.name()).
                 setHeader(KafkaHeaders.KEY, key).
                 setHeader("eventType", eventType.getValue()).
                 build();
-        template.send(message);
+        template.send(message).whenComplete((_, ex) -> {;
+            if (ex != null) {
+                LOGGER.error("Failed to send message: " + ex.getMessage());
+            }
+        });
     }
 
 

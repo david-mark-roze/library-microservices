@@ -66,8 +66,6 @@ public class LoanServiceImpl implements LoanService {
         loan.calculateDueDate(loanPeriodDays);
         Loan saved = repository.save(loan);
 
-        // Send a request to the book services system to update its edition copy details.
-        //bookClient.borrowCopy(loanRequestDTO.getEditionCopyId());
         eventPublisher.publishEvent(loanCreatedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
@@ -94,7 +92,6 @@ public class LoanServiceImpl implements LoanService {
         Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = repository.save(loan);
-        //bookClient.returnCopy(saved.getEditionCopyId());
         eventPublisher.publishEvent(loanReturnedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
@@ -105,7 +102,6 @@ public class LoanServiceImpl implements LoanService {
         Loan loan = findById(id);
         loan.markLost();
         Loan saved = repository.save(loan);
-        //bookClient.markCopyLost(saved.getEditionCopyId());
         eventPublisher.publishEvent(loanLostEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }

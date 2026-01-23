@@ -20,10 +20,10 @@ public class EditionCopyController {
      * @return A {@link ResponseEntity} containing a {@link EditionCopyDTO}
      * object containing details of the borrowed edition copy.
      */
-    @PostMapping("/{id}/borrow")
-    public ResponseEntity<EditionCopyDTO> borrowCopy(@PathVariable Long id){
-        return ResponseEntity.ok(editionCopyService.borrowCopy(null, id));
-    }
+//    @PostMapping("/{id}/borrow")
+//    public ResponseEntity<EditionCopyDTO> borrowCopy(@PathVariable Long id){
+//        return ResponseEntity.ok(editionCopyService.borrowCopy(id));
+//    }
 
     /**
      * Handles a REST API POST for returning an edition copy.
@@ -32,10 +32,10 @@ public class EditionCopyController {
      * @return A {@link ResponseEntity} containing a {@link EditionCopyDTO}
      * object containing details of the returned edition copy.
      */
-    @PostMapping("/{id}/return")
-    public ResponseEntity<EditionCopyDTO> returnCopy(@PathVariable Long id){
-        return ResponseEntity.ok(editionCopyService.returnCopy(null, id));
-    }
+//    @PostMapping("/{id}/return")
+//    public ResponseEntity<EditionCopyDTO> returnCopy(@PathVariable Long id){
+//        return ResponseEntity.ok(editionCopyService.returnCopy(id));
+//    }
 
     /**
      * Handles a REST API GET to find an edition copy by its unique id.
@@ -45,7 +45,7 @@ public class EditionCopyController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<EditionCopyDTO> findCopy(@PathVariable Long id){
-        return ResponseEntity.ok(editionCopyService.findCopy(null, id));
+        return ResponseEntity.ok(editionCopyService.findCopy(id));
     }
 
     /**
@@ -55,8 +55,8 @@ public class EditionCopyController {
      * @return A {@link ResponseEntity} containing a {@link EditionCopyDTO}
      * object containing details of the lost edition copy.
      */
-    @PostMapping("/{id}/lost")
-    public ResponseEntity<EditionCopyDTO> markCopyLost(@PathVariable Long id){
-        return ResponseEntity.ok(editionCopyService.markCopyLost(null, id));
-    }
+//    @PostMapping("/{id}/lost")
+//    public ResponseEntity<EditionCopyDTO> markCopyLost(@PathVariable Long id){
+//        return ResponseEntity.ok(editionCopyService.markCopyLost(id));
+//    }
 }

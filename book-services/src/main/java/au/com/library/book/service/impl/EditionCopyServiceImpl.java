@@ -41,32 +41,52 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     }
 
     @Override
-    public EditionCopyDTO borrowCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
-        EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        copy.markBorrowed();
-        EditionCopy saved = editionCopyRepository.save(copy);
-        return EditionCopyDTO.toDTO(saved);
+    public void borrowCopy(Long copyId) throws ResourceNotFoundException {
+        EditionCopy copy = findById(copyId);
+        EditionCopyStatus status = copy.getStatus();
+        switch (status){
+            case AVAILABLE -> {
+                copy.markBorrowed();
+                editionCopyRepository.save(copy);
+            }
+            case LOANED -> LOGGER.info("The edition copy with id %s is already on loan", copyId);
+            case LOST -> LOGGER.info("The edition copy with id %s is marked as lost and cannot be borrowed", copyId);
+            default -> throw new IllegalStateException("The edition copy status is invalid");
+        }
     }
 
     @Override
-    public EditionCopyDTO returnCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
-        EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        copy.markAvailable();
-        EditionCopy saved = editionCopyRepository.save(copy);
-        return EditionCopyDTO.toDTO(saved);
+    public void returnCopy(Long copyId) throws ResourceNotFoundException {
+        EditionCopy copy = findById(copyId);
+        EditionCopyStatus status = copy.getStatus();
+        switch (status){
+            case LOANED -> {
+                copy.markAvailable();
+                editionCopyRepository.save(copy);
+            }
+            case AVAILABLE -> LOGGER.info("The edition copy with id %s is already available in the library", copyId);
+            case LOST -> LOGGER.info("The edition copy with id %s is marked as lost and cannot be returned", copyId);
+            default -> throw new IllegalStateException("The edition copy status is invalid");
+        }
     }
 
     @Override
-    public EditionCopyDTO markCopyLost(Long editionId, Long copyId) throws ResourceNotFoundException {
-        EditionCopy copy = findByIdAndEditionId(copyId, editionId);
-        copy.markLost();
-        EditionCopy saved = editionCopyRepository.save(copy);
-        return EditionCopyDTO.toDTO(saved);
+    public void markCopyLost(Long copyId) throws ResourceNotFoundException {
+        EditionCopy copy = findById(copyId);
+        EditionCopyStatus status = copy.getStatus();
+        switch (status){
+            case LOST -> LOGGER.info("The edition copy with id %s is already marked as lost", copyId);
+            case AVAILABLE, LOANED -> {
+                copy.markLost();
+                editionCopyRepository.save(copy);
+            }
+            default -> throw new IllegalStateException("The edition copy status is invalid");
+        }
     }
 
     @Override
-    public EditionCopyDTO findCopy(Long editionId, Long copyId) throws ResourceNotFoundException {
-        return EditionCopyDTO.toDTO(findByIdAndEditionId(copyId, editionId));
+    public EditionCopyDTO findCopy(Long copyId) throws ResourceNotFoundException {
+        return EditionCopyDTO.toDTO(findById(copyId));
     }
 
     @Override
@@ -75,15 +95,9 @@ public class EditionCopyServiceImpl implements EditionCopyService {
         return copies.stream().map(EditionCopyDTO::toDTO).toList();
     }
 
-    private EditionCopy findByIdAndEditionId(Long copyId, Long editionId){
-        if(editionId == null){
-            return editionCopyRepository.findById(copyId).orElseThrow(
-                    ()-> new ResourceNotFoundException(String.format("The edition copy with the copy id %s could not be found", copyId)
-                    )
-            );
-        }
-        return editionCopyRepository.findByIdAndEditionId(copyId, editionId).orElseThrow(
-                ()-> new ResourceNotFoundException(String.format("The edition copy with the copy id %s and edition id %s could not be found", copyId, editionId)
+    private EditionCopy findById(Long copyId) {
+        return editionCopyRepository.findById(copyId).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("The edition copy with the copy id %s could not be found", copyId)
                 )
         );
     }
