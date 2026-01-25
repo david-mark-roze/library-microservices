@@ -5,23 +5,16 @@ package au.com.library.loan.kafka.event;
  * A value is associated with each event type to include in the header of the Kafka message.
  */
 public enum LoanEventType {
-
     /**
      * Event type for when a loan is created.
      */
-    LOAN_CREATED("loan-created"),
+    LOAN_CREATED,
     /**
      * Event type for when a loan is returned.
      */
-    LOAN_RETURNED("loan-returned"),
+    LOAN_RETURNED,
     /**
      * Event type for when a loan is marked as lost.
      */
-    LOAN_MARKED_LOST("loan-marked-lost");
-
-    private final String value;
-
-    private LoanEventType(String value) {
-        this.value = value;
-    }
+    LOAN_MARKED_LOST;
 }

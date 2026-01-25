@@ -12,6 +12,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import java.time.LocalDateTime;
 
+/**
+ * A global exception handler class for handling service exceptions.
+ */
 @ControllerAdvice
 public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
 

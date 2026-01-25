@@ -6,22 +6,35 @@ services:
     ports:
       - "9092:9092"
     environment:
+      # Broker and Controller configuration
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
+      # Set the controller quorum voters. Here we have a single node cluster.
+      # In a multi-node setup, this would include all controller nodes.
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-
-      # Bind listeners
+      # Bind listeners, including controller listener, to all interfaces.
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
 
-      # Advertise correct addresses to clients
+      # Advertise correct addresses to clients. Use container name for inter-container communication.
+      # Use localhost for host machine access.
+      # PLAINTEXT is for Docker internal communication, PLAINTEXT_HOST for localhost access.
+      # PLAINTEXT_HOST://localhost:9092 tells your host-based Spring apps: “talk to me at localhost:9092”.
+      # PLAIN
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
 
+      # Map listener names to security protocols. All are PLAINTEXT in this setup.
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
+      # Specify which listener is used for inter-broker communication and controller communication.
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Specify which listener is used for inter-broker communication. Here, we use PLAINTEXT.
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
 
+      # Zookeeper is not used in KRaft mode, so we disable it.
+      # This comment below is included for clarity.
+      # KAFKA_ZOOKEEPER_CONNECT: ""
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+      # Set replication factors to 1 for single-node setup
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1

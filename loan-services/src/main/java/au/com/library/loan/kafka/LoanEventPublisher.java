@@ -36,7 +36,7 @@ public class LoanEventPublisher {
                 build();
         template.send(message).whenComplete((_, ex) -> {;
             if (ex != null) {
-                LOGGER.error("Failed to send message: " + ex.getMessage());
+                LOGGER.error("Failed to send message: {0}", ex.getMessage());
             }
         });
     }

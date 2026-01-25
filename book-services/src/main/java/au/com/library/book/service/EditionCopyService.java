@@ -25,7 +25,6 @@ public interface EditionCopyService {
     /**
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#LOANED on loan}.
      * @param copyId The id of the edition copy being borrowed.
-     * @return An {@link EditionCopyDTO} object containing the details of the borrowed copy.
      * @throws ResourceNotFoundException Thrown when the edition copy to be borrowed could not be found.
      */
     void borrowCopy(Long copyId) throws ResourceNotFoundException;
@@ -34,7 +33,6 @@ public interface EditionCopyService {
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#AVAILABLE available}
      * after it has been returned.
      * @param copyId The id of the edition copy being returned.
-     * @return An {@link EditionCopyDTO} object containing the details of the returned copy.
      * @throws ResourceNotFoundException Thrown when details of the edition copy being returned could not be found in the system.
      */
     void returnCopy(Long copyId) throws ResourceNotFoundException;
@@ -43,7 +41,6 @@ public interface EditionCopyService {
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#LOST lost}
      * and therefore no longer available.
      * @param copyId The id of the lost edition copy.
-     * @return An {@link EditionCopyDTO} object containing the details of being marked as lost.
      * @throws ResourceNotFoundException Thrown when details of the lost edition copy could not be found in the system.
      */
     void markCopyLost(Long copyId) throws ResourceNotFoundException;
@@ -60,7 +57,7 @@ public interface EditionCopyService {
      * Handles the retrieval of all {@link au.com.library.book.entity.EditionCopy copies} of an {@link au.com.library.book.entity.Edition edition}.
      * @param editionId The edition id.
      * @return A {@link List} of {@link EditionCopyDTO} objects, each representing a copy of an edition.
-     * @throws ResourceNotFoundException
+     * @throws ResourceNotFoundException Thrown when the edition with the specified id could not be found.
      */
     List<EditionCopyDTO> findCopies(Long editionId) throws ResourceNotFoundException;
 

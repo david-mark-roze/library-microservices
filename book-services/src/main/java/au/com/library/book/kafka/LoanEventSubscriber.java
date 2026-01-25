@@ -8,6 +8,9 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+/**
+ * Subscribes to loan events from Kafka and updates edition copy statuses accordingly.
+ */
 @Component
 @RequiredArgsConstructor
 public class LoanEventSubscriber {
@@ -15,6 +18,12 @@ public class LoanEventSubscriber {
     private final EditionCopyService service;
     private final ObjectMapper objectMapper;
 
+    /**
+     * Subscribes to loan events and processes them based on their type.
+     *
+     * @param eventPayload The payload of the loan event.
+     * @throws IllegalArgumentException if the event type is unknown or the payload is null.
+     */
     @KafkaListener(
             topics = "${spring.kafka.topic.loan-event}",
             groupId = "${spring.kafka.consumer.group-id}"

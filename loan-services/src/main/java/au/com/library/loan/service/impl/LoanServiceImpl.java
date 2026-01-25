@@ -40,6 +40,13 @@ public class LoanServiceImpl implements LoanService {
     @Value("${renewal.limit}")
     private int renewalLimit;
 
+    /**
+     * Creates a new loan for a library book edition copy.
+     *
+     * @param loanRequestDTO A {@link LoanRequestDTO} containing the data required to create the loan.
+     * @return A {@link LoanResponseDTO} containing details of the created loan.
+     * @throws CopyUnavailableException if the requested edition copy is not available for loan.
+     */
     @Override
     @Transactional
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
@@ -69,6 +76,14 @@ public class LoanServiceImpl implements LoanService {
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
+    /**
+     * Renews an existing loan.
+     * @param id The id of the loan to renew.
+     * @return A {@link LoanResponseDTO} containing details of the renewed loan.
+     * @throws ConflictException
+     * @throws ResourceNotFoundException Thrown if the loan with the specified id could not be found.
+     * @throws IllegalArgumentException Thrown if the provided id is null or not a positive non-zero value.
+     */
     @Override
     public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         validateId(id);
@@ -85,6 +100,15 @@ public class LoanServiceImpl implements LoanService {
         return Mapper.map(renewed, LoanResponseDTO.class);
     }
 
+    /**
+     * Returns a loaned book edition copy.
+     *
+     * @param id The id of the loan to return.
+     * @return A {@link LoanResponseDTO} containing details of the returned loan.
+     * @throws ConflictException if the loan is not in a state that allows it to be returned.
+     * @throws ResourceNotFoundException if the loan with the specified id could not be found.
+     * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
+     */
     @Override
     @Transactional
     public LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
@@ -95,6 +119,15 @@ public class LoanServiceImpl implements LoanService {
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
+    /**
+     * Marks a loaned book edition copy as lost.
+     *
+     * @param id The id of the loan to mark as lost.
+     * @return A {@link LoanResponseDTO} containing details of the lost loan.
+     * @throws ConflictException if the loan is not in a state that allows it to be marked as lost.
+     * @throws ResourceNotFoundException if the loan with the specified id could not be found.
+     * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
+     */
     @Override
     @Transactional
     public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
@@ -105,6 +138,14 @@ public class LoanServiceImpl implements LoanService {
         return Mapper.map(saved, LoanResponseDTO.class);
     }
 
+    /**
+     * Finds a loan by its unique id.
+     *
+     * @param id The id of the loan to find.
+     * @return A {@link LoanResponseDTO} containing details of the found loan.
+     * @throws ResourceNotFoundException if the loan with the specified id could not be found.
+     * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
+     */
     @Override
     public LoanResponseDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException {
         return Mapper.map(findById(id), LoanResponseDTO.class);
