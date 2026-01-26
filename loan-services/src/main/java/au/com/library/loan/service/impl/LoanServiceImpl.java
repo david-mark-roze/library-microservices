@@ -6,7 +6,6 @@ import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
 import au.com.library.loan.exception.CopyUnavailableException;
-import au.com.library.loan.kafka.event.*;
 import au.com.library.loan.repository.LoanRepository;
 import au.com.library.loan.service.LoanService;
 import au.com.library.shared.exception.ConflictException;
@@ -17,8 +16,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import au.com.library.contracts.event.loan.LoanEvent;
+import au.com.library.contracts.event.loan.LoanEventContext;
 
-import static au.com.library.loan.kafka.event.LoanEventType.*;
+import static au.com.library.contracts.event.loan.LoanEventType.*;
 
 /**
  * The {@link LoanService} implementation.
@@ -164,9 +165,7 @@ public class LoanServiceImpl implements LoanService {
     }
 
     private LoanEventContext loanEventContext(Loan loan){
-        return LoanEventContext.builder().loanId(loan.getId()).
-                editionCopyId(loan.getEditionCopyId()).
-                memberId(loan.getMemberId()).build();
+        return new LoanEventContext(loan.getId(), loan.getMemberId(), loan.getEditionCopyId());
     }
 
     private void validateId(Long id){

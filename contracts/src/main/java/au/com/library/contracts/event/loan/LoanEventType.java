@@ -1,8 +1,7 @@
-package au.com.library.loan.kafka.event;
+package au.com.library.contracts.event.loan;
 
 /**
- * Represents the types of events related to loans that can be published to Kafka.
- * A value is associated with each event type to include in the header of the Kafka message.
+ * Represents the types of events related to loans that can be published to Kafka and received by subscribers.
  */
 public enum LoanEventType {
     /**

@@ -78,11 +78,19 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Shared Module Dependencies -->
         <dependency>
             <groupId>au.com.library</groupId>
             <artifactId>shared</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>au.com.library</groupId>
+            <artifactId>contracts</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
         <!-- Kafka Dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

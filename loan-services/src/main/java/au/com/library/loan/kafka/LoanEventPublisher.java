@@ -1,8 +1,7 @@
 package au.com.library.loan.kafka;
 
-import au.com.library.loan.kafka.event.*;
+import au.com.library.contracts.event.loan.LoanEvent;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

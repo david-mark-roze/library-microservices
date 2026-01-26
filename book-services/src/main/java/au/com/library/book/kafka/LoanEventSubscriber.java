@@ -1,6 +1,6 @@
 package au.com.library.book.kafka;
 
-import au.com.library.book.kafka.event.LoanEvent;
+import au.com.library.contracts.event.loan.LoanEvent;
 import au.com.library.book.service.EditionCopyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
