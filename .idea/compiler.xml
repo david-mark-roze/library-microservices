@@ -13,7 +13,7 @@
         <module name="contracts" />
         <module name="service-registry" />
       </profile>
-      <profile name="Annotation profile for loan-services" enabled="true">
+      <profile name="Annotation profile for library-microservices" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />

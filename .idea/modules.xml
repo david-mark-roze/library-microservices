@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/api-gateway/api-gateway.iml" filepath="$PROJECT_DIR$/api-gateway/api-gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/book-services/book-services.iml" filepath="$PROJECT_DIR$/book-services/book-services.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/library-microservices.iml" filepath="$PROJECT_DIR$/.idea/library-microservices.iml" />
       <module fileurl="file://$PROJECT_DIR$/loan-services/loan-services.iml" filepath="$PROJECT_DIR$/loan-services/loan-services.iml" />
       <module fileurl="file://$PROJECT_DIR$/member-services/member-services.iml" filepath="$PROJECT_DIR$/member-services/member-services.iml" />
     </modules>
