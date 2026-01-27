@@ -4,6 +4,7 @@ import au.com.library.book.dto.EditionCopyDTO;
 import au.com.library.book.entity.Edition;
 import au.com.library.book.entity.EditionCopy;
 import au.com.library.book.entity.EditionCopyStatus;
+import au.com.library.book.exception.InvalidEditionCopyStatusException;
 import au.com.library.book.repository.EditionCopyRepository;
 import au.com.library.book.repository.EditionRepository;
 import au.com.library.book.service.EditionCopyService;
@@ -51,7 +52,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
             }
             case LOANED -> LOGGER.info("The edition copy with id %s is already on loan", copyId);
             case LOST -> LOGGER.info("The edition copy with id %s is marked as lost and cannot be borrowed", copyId);
-            default -> throw new IllegalStateException("The edition copy status is invalid");
+            default -> throw new InvalidEditionCopyStatusException("The edition copy status is invalid");
         }
     }
 
@@ -66,7 +67,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
             }
             case AVAILABLE -> LOGGER.info("The edition copy with id %s is already available in the library", copyId);
             case LOST -> LOGGER.info("The edition copy with id %s is marked as lost and cannot be returned", copyId);
-            default -> throw new IllegalStateException("The edition copy status is invalid");
+            default -> throw new InvalidEditionCopyStatusException("The edition copy status is invalid");
         }
     }
 
@@ -80,7 +81,7 @@ public class EditionCopyServiceImpl implements EditionCopyService {
                 copy.markLost();
                 editionCopyRepository.save(copy);
             }
-            default -> throw new IllegalStateException("The edition copy status is invalid");
+            default -> throw new InvalidEditionCopyStatusException("The edition copy status is invalid");
         }
     }
 
