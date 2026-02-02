@@ -8,58 +8,77 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
 @Entity
 public class Loan {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
     @Column(nullable = false)
     private Long memberId;
 
+    @Getter
     @Column(nullable = false)
     private String memberFirstName;
 
+    @Getter
     @Column(nullable = false)
     private String memberLastName;
 
+    @Getter
     @Column(nullable = false)
     private Long editionCopyId;
 
+    @Getter
     @Column(nullable = false)
     private String bookTitle;
 
+    @Getter
     @Column(nullable = false)
     private String author;
 
+    @Getter
     @Column(nullable = false)
     private String edition;
 
+    @Getter
     @Column(nullable = false)
     private String barcode;
 
     /**
      * Set to the current date when the loan is created.
      */
+    @Getter
     @Column(nullable = false)
     private LocalDate loanDate;
 
+    @Getter
     @Column(nullable = false)
     private LocalDate dueDate;
 
     /**
      * Number of times the loan has been renewed. Will have an initial value of 0.
      */
+    @Getter
     @Column(nullable = false)
     private int renewalCount;
 
+    @Getter
     private LocalDate returnDate;
 
+    @Getter
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
+
+    /**
+     * Holds the id of the edition copy while the loan is active (borrowed or renewed). Once the loan is closed (returned or lost), this value is set to null.
+     * This enforces the constraint that an edition copy can only be associated with one active loan at a time.
+     */
+    private Long openCopyId;
 
     @Builder
     /**
@@ -88,6 +107,7 @@ public class Loan {
         this.status = LoanStatus.BORROWED;
         this.loanDate = LocalDate.now();
         this.renewalCount = 0;
+        this.openCopyId = editionCopyId;
     }
 
     /**
@@ -116,6 +136,7 @@ public class Loan {
         }
         status = LoanStatus.RETURNED;
         returnDate = LocalDate.now();
+        closeLoanCopy();
     }
 
     /**
@@ -160,6 +181,7 @@ public class Loan {
             throw new ConflictException("Only overdue loans  can be marked as lost");
         }
         this.status = LoanStatus.LOST;
+        closeLoanCopy();
     }
 
     private void handleRenewal(int loanPeriodDays){
@@ -168,5 +190,9 @@ public class Loan {
             status = LoanStatus.RENEWED;
         }
         renewalCount++;
+    }
+
+    private void closeLoanCopy() {
+        this.openCopyId = null;
     }
 }

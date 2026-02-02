@@ -12,6 +12,9 @@ import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.Mapper;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,8 @@ import static au.com.library.contracts.event.loan.LoanEventType.*;
 @RequiredArgsConstructor
 @Service
 public class LoanServiceImpl implements LoanService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoanServiceImpl.class);
 
     private final BookClient bookClient;
     private final MemberClient memberClient;
@@ -53,9 +58,6 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
 
         EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.getEditionCopyId());
-        if(!copy.getStatus().isAvailable()) {
-            throw new CopyUnavailableException("The copy of the book requested is unavailable");
-        }
         MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.getMemberId());
         EditionSnapshotDTO edition = bookClient.findEdition(copy.getEditionId());
         BookSnapshotDTO book = bookClient.findBook(edition.getBookId());
@@ -71,8 +73,8 @@ public class LoanServiceImpl implements LoanService {
                 memberLastName(member.getLastName()).
                 build();
         loan.calculateDueDate(loanPeriodDays);
-        Loan saved = repository.save(loan);
-
+        Loan saved = saveNewLoan(loan);
+        // Publish loan created event for all registered listeners.
         eventPublisher.publishEvent(loanCreatedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
@@ -181,5 +183,15 @@ public class LoanServiceImpl implements LoanService {
                         ()-> new ResourceNotFoundException(String.format("The loan with the id %s could not be found", id)
                         )
                 );
+    }
+
+    private Loan saveNewLoan(Loan loan) throws CopyUnavailableException {
+        try {
+            return repository.save(loan);
+        } catch (ConstraintViolationException e) {
+            // Will occur when a unique constraint is violated i.e. a loan is active for the specified edition copy
+            LOGGER.error(e.getMessage(), e);
+            throw new CopyUnavailableException("The copy of the book requested is unavailable");
+        }
     }
 }

@@ -46,32 +46,4 @@ public interface BookClient {
     @GetMapping("/api/copies/{id}")
     EditionCopySnapshotDTO findCopy(@PathVariable Long id);
 
-    /**
-     * Finds a book edition copy with the specified id and marks it
-     * as {@link au.com.library.loan.dto.EditionCopyStatus#LOANED on loan}.
-     *
-     * @param id The edition copy id.
-     * @return A {@link EditionCopySnapshotDTO} object containing the updated edition copy details.
-     */
-    @PostMapping("/api/copies/{id}/borrow")
-    EditionCopySnapshotDTO borrowCopy(@PathVariable Long id);
-
-    /**
-     * Returns a book edition copy with the specified id.
-     *
-     * @param id The edition copy id.
-     * @return A {@link EditionCopySnapshotDTO} object containing the updated edition copy details.
-     */
-    @PostMapping("/api/copies/{id}/return")
-    EditionCopySnapshotDTO returnCopy(@PathVariable Long id);
-
-    /**
-     * Marks a book edition copy with the specified id as lost.
-     *
-     * @param id The edition copy id.
-     * @return A {@link EditionCopySnapshotDTO} object containing the updated edition copy details.
-     */
-    @PostMapping("/api/copies/{id}/lost")
-    EditionCopySnapshotDTO markCopyLost(@PathVariable Long id);
-
 }
