@@ -47,7 +47,35 @@ public class HoldAllocation {
 
     private Long openCopyId;
 
-    public HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode) {
+    /**
+     * Builder for creating HoldAllocation instances.
+     */
+    public static final class Builder {
+        private HoldRequest holdRequest;
+        private Long editionCopyId;
+        private String barcode;
+
+        public Builder holdRequest(HoldRequest holdRequest) {
+            this.holdRequest = holdRequest;
+            return this;
+        }
+
+        public Builder editionCopyId(Long editionCopyId) {
+            this.editionCopyId = editionCopyId;
+            return this;
+        }
+
+        public Builder barcode(String barcode) {
+            this.barcode = barcode;
+            return this;
+        }
+
+        public HoldAllocation build() {
+            return new HoldAllocation(holdRequest, editionCopyId, barcode);
+        }
+    }
+
+    private HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode) {
         this.holdRequest = holdRequest;
         this.editionCopyId = editionCopyId;
         this.barcode = barcode;

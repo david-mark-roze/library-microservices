@@ -1,7 +1,6 @@
 package au.com.library.loan.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
@@ -13,6 +12,8 @@ import java.time.LocalDate;
  */
 @Entity
 public class HoldRequest {
+
+    private static final String HOLD_KEY_FORMAT = "E%s-M%s";
 
     @Getter
     @Id
@@ -64,6 +65,10 @@ public class HoldRequest {
     @Column(nullable = false)
     private LocalDate dateRequested;
 
+    /**
+     *  Unique key for identifying open hold requests for a specific edition and member.
+     *  Used to enforce a uniqueness constraint on open holds.
+     */
     private String openHoldKey;
 
     @Getter
@@ -71,7 +76,71 @@ public class HoldRequest {
     @OneToOne(mappedBy = "holdRequest", fetch = FetchType.LAZY)
     private HoldAllocation allocation;
 
-    public HoldRequest(Long memberId, String memberLastName, String memberFirstName, String email, String phone, Long editionId, String bookTitle, String author, String edition) {
+    /**
+     * Builder for creating HoldRequest instances.
+     */
+   public static final class Builder {
+        private Long memberId;
+        private String memberLastName;
+        private String memberFirstName;
+        private String email;
+        private String phone;
+        private Long editionId;
+        private String bookTitle;
+        private String author;
+        private String edition;
+
+        public Builder memberId(Long memberId) {
+            this.memberId = memberId;
+            return this;
+        }
+
+        public Builder memberLastName(String memberLastName) {
+            this.memberLastName = memberLastName;
+            return this;
+        }
+
+        public Builder memberFirstName(String memberFirstName) {
+            this.memberFirstName = memberFirstName;
+            return this;
+        }
+
+        public Builder email(String email) {
+            this.email = email;
+            return this;
+        }
+
+        public Builder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder editionId(Long editionId) {
+            this.editionId = editionId;
+            return this;
+        }
+
+        public Builder bookTitle(String bookTitle) {
+            this.bookTitle = bookTitle;
+            return this;
+        }
+
+        public Builder author(String author) {
+            this.author = author;
+            return this;
+        }
+
+        public Builder edition(String edition) {
+            this.edition = edition;
+            return this;
+        }
+
+        public HoldRequest build() {
+            return new HoldRequest(memberId, memberLastName, memberFirstName, email, phone, editionId, bookTitle, author, edition);
+        }
+    }
+
+    private HoldRequest(Long memberId, String memberLastName, String memberFirstName, String email, String phone, Long editionId, String bookTitle, String author, String edition) {
         this.memberId = memberId;
         this.memberLastName = memberLastName;
         this.memberFirstName = memberFirstName;
@@ -83,5 +152,6 @@ public class HoldRequest {
         this.edition = edition;
         this.dateRequested = LocalDate.now();
         this.status = HoldRequestStatus.ACTIVE;
+        this.openHoldKey = String.format(HOLD_KEY_FORMAT, editionId, memberId);
     }
 }
