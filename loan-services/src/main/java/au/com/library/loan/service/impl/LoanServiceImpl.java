@@ -1,5 +1,7 @@
 package au.com.library.loan.service.impl;
 
+import au.com.library.contracts.event.loan.LoanEvent;
+import au.com.library.contracts.event.loan.LoanEventContext;
 import au.com.library.loan.client.BookClient;
 import au.com.library.loan.client.MemberClient;
 import au.com.library.loan.dto.*;
@@ -19,8 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import au.com.library.contracts.event.loan.LoanEvent;
-import au.com.library.contracts.event.loan.LoanEventContext;
 
 import static au.com.library.contracts.event.loan.LoanEventType.*;
 

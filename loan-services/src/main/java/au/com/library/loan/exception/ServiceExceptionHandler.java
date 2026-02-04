@@ -58,6 +58,22 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
+     * Handles a {@link DuplicateHoldRequestException}.
+     * @param exception A reference to the {@link DuplicateHoldRequestException} object.
+     * @param request The {@link WebRequest} object.
+     * @return The {@link ResponseEntity} object containing the error details.
+     */
+    @ExceptionHandler
+    public ResponseEntity<ErrorDetails> handleDuplicateHoldRequestException(DuplicateHoldRequestException exception, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                request.getDescription(false),
+                "DUPLICATE_HOLD_REQUEST");
+        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+
+    /**
      * Handles a {@link ConflictException}.
      * @param exception A reference to the {@link ConflictException} object.
      * @param request The {@link WebRequest} object.

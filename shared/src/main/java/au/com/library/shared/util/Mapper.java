@@ -4,7 +4,7 @@ import org.modelmapper.ModelMapper;
 
 /**
  * Handles the mapping of one object to another, provided the attributes of the destination
- * type exactly matches that of the source.
+ * type exactly matches that of the source. {@link ModelMapper} is used to perform the mapping under the hood.
  */
 public final class Mapper {
 

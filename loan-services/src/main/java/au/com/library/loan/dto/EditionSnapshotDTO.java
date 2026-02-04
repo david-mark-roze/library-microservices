@@ -13,6 +13,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EditionSnapshotDTO {
 
+    private Long id;
     private String edition;
     private Long bookId;
 }

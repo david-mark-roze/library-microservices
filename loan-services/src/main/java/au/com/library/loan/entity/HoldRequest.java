@@ -1,7 +1,9 @@
 package au.com.library.loan.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
@@ -10,6 +12,9 @@ import java.time.LocalDate;
  *
  * @see HoldAllocation
  */
+// Lombok annotation to generate a no-args constructor with protected access level and force initialization of final fields.
+// This will restrict direct instantiation while allowing JPA to create instances via reflection.
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Entity
 public class HoldRequest {
 
@@ -138,6 +143,10 @@ public class HoldRequest {
         public HoldRequest build() {
             return new HoldRequest(memberId, memberLastName, memberFirstName, email, phone, editionId, bookTitle, author, edition);
         }
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     private HoldRequest(Long memberId, String memberLastName, String memberFirstName, String email, String phone, Long editionId, String bookTitle, String author, String edition) {

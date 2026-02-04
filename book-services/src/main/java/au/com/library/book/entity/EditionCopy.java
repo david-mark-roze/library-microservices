@@ -46,7 +46,6 @@ public class EditionCopy {
     private LocalDateTime dateAcquired;
 
     // Bidirectional many to one - This child EditionCopy references its parent Edition via
-    // Bidirectional many to one - This child EditionCopy references its parent Edition via
     // the 'edition_id' foreign key. In the parent, this is the 'id' column.
     @JoinColumn(name = "edition_id", referencedColumnName = "id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

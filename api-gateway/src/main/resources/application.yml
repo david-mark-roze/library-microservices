@@ -38,7 +38,9 @@ spring:
               predicates:
                 - name: Path
                   args:
-                    pattern: /api/loans/**
+                    patterns:
+                    - /api/loans/**
+                    - /api/holds/**
 eureka:
   client:
     service-url:
