@@ -2,6 +2,7 @@ package au.com.library.loan.service;
 
 import au.com.library.loan.dto.EditionCopySnapshotDTO;
 import au.com.library.loan.dto.HoldRequestResultDTO;
+import au.com.library.loan.entity.HoldRequest;
 import au.com.library.loan.entity.HoldRequestStatus;
 import au.com.library.loan.exception.BlockedLoanException;
 import au.com.library.shared.exception.ConflictException;
@@ -36,4 +37,6 @@ public interface HoldRequestService {
      * @throws ConflictException Thrown if there is an open hold request for the edition that belongs to the member but is in an invalid state for loan creation hold checking.
      */
     void loanCreationHoldChecking(EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException, ConflictException;
+
+    void loanReturnAllocation(EditionCopySnapshotDTO editionCopySnapshot);
 }

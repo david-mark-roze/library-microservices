@@ -24,6 +24,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /**
@@ -90,12 +92,20 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         if (holdRequest.getMemberId().equals(memberId)) {
             HoldRequestStatus status = holdRequest.getStatus();
             switch (status){
-                case ACTIVE -> handleActiveHoldRequest(holdRequest, editionCopySnapshot, memberId);
+                case ACTIVE -> allocateHoldRequest(holdRequest, editionCopySnapshot);
                 case ALLOCATED -> handleAllocatedHoldRequest(holdRequest, editionCopySnapshot, memberId);
                 default -> throw new ConflictException("The hold request for this member is in an invalid state for loan creation hold checking: " + status);
             }
         } else {
             throw new BlockedLoanException("This edition is currently on hold for another member.");
+        }
+    }
+
+    @Override
+    public void loanReturnAllocation(EditionCopySnapshotDTO editionCopySnapshot) {
+        HoldRequest holdRequest = findActiveHoldRequest(editionCopySnapshot.getEditionId());
+        if (holdRequest != null) {
+            allocateHoldRequest(holdRequest, editionCopySnapshot);
         }
     }
 
@@ -105,25 +115,33 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         }
     }
 
-    private HoldRequest findOpenHoldRequests(Long editionId){
-        PageRequest pageable = PageRequest.of(0,1);
-        List<HoldRequest> holdRequests = holdRequestRepository.lockedOpenHoldRequestsByEditionId(editionId, pageable);
-        if(!holdRequests.isEmpty()){
+    private HoldRequest findOpenHoldRequests(Long editionId) {
+        List<HoldRequest> holdRequests = holdRequestRepository.lockedOpenHoldRequestsByEditionId(editionId, PageRequest.of(0, 1));
+        if (!holdRequests.isEmpty()) {
             return holdRequests.get(0);
         }
         return null;
     }
 
-    private void handleActiveHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {
+    private HoldRequest findActiveHoldRequest(Long editionId) {
+        List<HoldRequest> holdRequests = holdRequestRepository.lockedActiveHeadHoldRequest(editionId, PageRequest.of(0, 1));
+        if (!holdRequests.isEmpty()) {
+            return holdRequests.get(0);
+        }
+        return null;
+    }
+
+    private void allocateHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot) throws BlockedLoanException {
         holdRequest.markAsAllocated();
         var allocation = HoldAllocation.builder()
                 .holdRequest(holdRequest)
                 .editionCopyId(editionCopySnapshot.getId())
                 .barcode(editionCopySnapshot.getBarcode())
+                .allocationDuration(Duration.of(loanHoldPeriodDays, ChronoUnit.DAYS))
                 .build();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
-        LOGGER.info("Hold request with ID {0} has been marked as allocated and a new hold allocation has been created for member ID {1} and edition ID {2}.", holdRequest.getId(), memberId, editionCopySnapshot.getEditionId());
+        LOGGER.info("Hold request with ID {0} has been marked as allocated and a new hold allocation has been created for edition ID {1}.", holdRequest.getId(), editionCopySnapshot.getEditionId());
     }
 
     private void handleAllocatedHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {

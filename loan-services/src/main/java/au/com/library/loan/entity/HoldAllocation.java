@@ -2,7 +2,9 @@ package au.com.library.loan.entity;
 
 import au.com.library.shared.util.Numbers;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.Clock;
@@ -16,6 +18,9 @@ import java.util.Objects;
  *
  * @see HoldRequest
  */
+// Lombok annotation to generate a no-args constructor with protected access level and force initialization of final fields.
+// This will restrict direct instantiation while allowing JPA to create instances via reflection.
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Entity
 public class HoldAllocation {
 
@@ -52,8 +57,6 @@ public class HoldAllocation {
 
     private Long openCopyId;
 
-    private Duration allocationDuration;
-
     /**
      * Builder for creating HoldAllocation instances.
      */
@@ -84,26 +87,53 @@ public class HoldAllocation {
             return this;
         }
 
+        /**
+         * Sets the HoldRequest for this allocation. The provided HoldRequest must not be null, or an IllegalArgumentException will be thrown.
+         * @param holdRequest the HoldRequest to associate with this allocation; must not be null.
+         * @return
+         */
         public Builder holdRequest(HoldRequest holdRequest) {
             this.holdRequest = holdRequest;
             return this;
         }
 
+        /**
+         * Sets the edition copy ID for this allocation. The provided ID must be a non-null positive number, or an IllegalArgumentException will be thrown.
+         * @param editionCopyId the ID of the edition copy being allocated; must be a non-null positive number.
+         * @return the Builder instance for method chaining.
+         */
         public Builder editionCopyId(Long editionCopyId) {
             this.editionCopyId = editionCopyId;
             return this;
         }
 
+        /**
+         * Sets the barcode for this allocation. The provided barcode must not be null or empty, or an IllegalArgumentException will be thrown.
+         * @param barcode the barcode of the edition copy being allocated; must not be null or empty.
+         * @return the Builder instance for method chaining.
+         */
         public Builder barcode(String barcode) {
             this.barcode = barcode;
             return this;
         }
 
+        /**
+         * Sets the duration for which this allocation is valid, after which it will expire.
+         * The expiry date will be calculated as the allocatedAt time plus the provided duration.
+         * The provided duration must not be null, or an IllegalArgumentException will be thrown.
+         * @param allocationDuration the duration for which this allocation is valid; must not be null.
+         * @return the Builder instance for method chaining.
+         */
         public Builder allocationDuration(Duration allocationDuration){
             this.allocationDuration = allocationDuration;
             return this;
         }
 
+        /**
+         * Builds a new HoldAllocation instance with the provided parameters. All parameters must be valid according to their respective setter methods, or an IllegalArgumentException will be thrown.
+         * @return a new HoldAllocation instance with the specified parameters.
+         * @throws IllegalArgumentException if any of the parameters are invalid according to their respective setter methods.
+         */
         public HoldAllocation build() {
             return new HoldAllocation(holdRequest, editionCopyId, barcode, allocatedAt, allocationDuration);
         }
@@ -121,6 +151,7 @@ public class HoldAllocation {
         if (!status.isAllocated()) {
             throw new IllegalStateException("Hold allocation must be allocated to be marked as collected.");
         }
+        openCopyId = null;
         this.status = HoldAllocationStatus.COLLECTED;
     }
 
@@ -130,9 +161,12 @@ public class HoldAllocation {
         this.barcode = checkNonNullParameter(barcode, "Barcode cannot be null");
         this.status = HoldAllocationStatus.ALLOCATED;
         this.allocatedAt = checkNonNullParameter(allocatedAt, "Allocation time cannot be null");
-        this.allocationDuration = checkNonNullParameter(allocationDuration, "Allocation duration cannot be null");
         this.openCopyId = editionCopyId;
-        this.expiryDate = allocatedAt.plus(allocationDuration).toLocalDate();
+        this.expiryDate = allocatedAt.plus(
+                checkNonNullParameter(
+                        allocationDuration,
+                        "Allocation duration cannot be null"))
+                .toLocalDate();
     }
 
     private <T> T checkNonNullParameter(T object, String message){
@@ -142,7 +176,7 @@ public class HoldAllocation {
     }
 
     private Number checkValidNumber(Number number, String message){
-        return Numbers.isNonNullPositiveOrElseThrow(editionCopyId, ()-> new IllegalArgumentException(message));
+        return Numbers.isNonNullPositiveOrElseThrow(number, ()-> new IllegalArgumentException(message));
     }
 
 }

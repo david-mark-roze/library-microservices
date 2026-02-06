@@ -127,6 +127,11 @@ public class LoanServiceImpl implements LoanService {
         Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = loanRepository.save(loan);
+        // Check if there are any active hold requests for the edition of the returned copy and,
+        // if so, allocate the returned copy to the earliest active hold request.
+        EditionCopySnapshotDTO editionCopySnapshot = bookClient.findCopy(loan.getEditionCopyId());
+        holdRequestService.loanReturnAllocation(editionCopySnapshot);
+        // Publish loan returned event for all registered listeners.
         eventPublisher.publishEvent(loanReturnedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }

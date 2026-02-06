@@ -193,5 +193,6 @@ public class HoldRequest {
             throw new ConflictException(String.format("Hold request with ID %d cannot be marked as completed because its current status is %s.", id, status));
         }
         this.status = HoldRequestStatus.COMPLETED;
+        this.openHoldKey = null;
     }
 }
