@@ -217,12 +217,12 @@ public class HoldRequest {
     }
 
     private HoldRequest(Long memberId, String memberLastName, String memberFirstName, String email, String phone, Long editionId, String bookTitle, String author, String edition) {
-        this.memberId = (Long) ValidationUtil.checkPositiveNumber(memberId, "Member ID must be non-null and greater than zero");
+        this.memberId = (Long) ValidationUtil.checkNonNullPositiveNumber(memberId, "Member ID must be non-null and greater than zero");
         this.memberLastName = ValidationUtil.checkNonNullParameter(memberLastName, "Member last name must be provided");
         this.memberFirstName = ValidationUtil.checkNonNullParameter(memberFirstName,"Member first name must be provided");
         this.email = ValidationUtil.checkNonNullParameter(email,"Member email must be provided");
         this.phone = ValidationUtil.checkNonNullParameter(phone,"Member phone must be provided");
-        this.editionId = (Long) ValidationUtil.checkPositiveNumber(editionId,"Edition ID must be non-null and greater than zero");
+        this.editionId = (Long) ValidationUtil.checkNonNullPositiveNumber(editionId,"Edition ID must be non-null and greater than zero");
         this.bookTitle = ValidationUtil.checkNonNullParameter(bookTitle,"Book title must be provided");
         this.author = ValidationUtil.checkNonNullParameter(author,"Book author must be provided");
         this.edition = ValidationUtil.checkNonNullParameter(edition, "Book edition must be provided");
@@ -259,6 +259,18 @@ public class HoldRequest {
             throw new ConflictException(String.format("Hold request with ID %d cannot be marked as completed because its current status is %s.", id, status));
         }
         this.status = HoldRequestStatus.COMPLETED;
+        this.openHoldKey = null;
+    }
+
+    /**
+     * Marks this hold request as cancelled by updating its status to {@link HoldRequestStatus#CANCELLED cancelled}.
+     * A hold request can be cancelled if it is currently active or allocated. If the hold request is already completed, it cannot be cancelled and a ConflictException will be thrown.
+     */
+    public void markAsCancelled() {
+        if(status.isCompleted()){
+            throw new ConflictException(String.format("Hold request with ID %d cannot be marked as cancelled because it has already been completed.", id));
+        }
+        this.status = HoldRequestStatus.CANCELLED;
         this.openHoldKey = null;
     }
 }

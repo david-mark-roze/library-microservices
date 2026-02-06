@@ -33,7 +33,7 @@ public final class ValidationUtil {
      * @param message The message to be included in the exception if the number is invalid.
      * @return The provided number if it is non-null and positive.
      */
-    public static Number checkPositiveNumber(Number number, String message) {
+    public static Number checkNonNullPositiveNumber(Number number, String message) {
         return Numbers.isNonNullPositiveOrElseThrow(number, () -> new IllegalArgumentException(message));
     }
 }

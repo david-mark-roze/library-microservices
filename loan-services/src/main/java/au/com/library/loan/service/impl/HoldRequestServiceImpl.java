@@ -12,6 +12,7 @@ import au.com.library.loan.mapper.HoldRequestMapper;
 import au.com.library.loan.repository.HoldAllocationRepository;
 import au.com.library.loan.repository.HoldRequestRepository;
 import au.com.library.loan.service.HoldRequestService;
+import au.com.library.loan.util.ValidationUtil;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
@@ -50,8 +51,8 @@ public class HoldRequestServiceImpl implements HoldRequestService {
 
     @Override
     public HoldRequestResultDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException {
-        validateId(memberId, "Member ID");
-        validateId(editionId, "Edition ID");
+        memberId = (Long)ValidationUtil.checkNonNullPositiveNumber(memberId, "Member ID must be a non null positive number.");
+        editionId = (Long)ValidationUtil.checkNonNullPositiveNumber(editionId, "Edition ID must be a non null positive number.");
 
         EditionSnapshotDTO editionSnapshot = bookClient.findEdition(editionId);
         BookSnapshotDTO bookSnapshot = bookClient.findBook(editionSnapshot.getBookId());
@@ -109,10 +110,24 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         }
     }
 
-    private void validateId(Long id, String label) throws IllegalArgumentException {
-        if(id == null || id == 0){
-            throw new IllegalArgumentException(String.format("%s must be provided and greater than zero.", label));
+    @Override
+    public HoldRequestResultDTO cancelHoldRequest(Long holdRequestId) throws ResourceNotFoundException, ConflictException {
+        Long finalHoldRequestId  = (Long)ValidationUtil.checkNonNullPositiveNumber(holdRequestId, "Hold Request ID must be a non null positive number.");
+
+        HoldRequest holdRequest = holdRequestRepository.findById(holdRequestId).orElseThrow(() -> new ResourceNotFoundException(String.format("Hold request with ID %d could not be found.", finalHoldRequestId)));
+        holdRequest.markAsCancelled();
+
+        HoldAllocation allocation = null;
+        if(holdRequest.hasAllocation()){
+            allocation = holdRequest.getAllocation();
+            allocation.markAsCancelled();
         }
+        HoldRequest savedHoldRequest = holdRequestRepository.save(holdRequest);
+        if(allocation != null){
+            allocationRepository.save(allocation);
+        }
+        LOGGER.info("Hold request with ID {0} has been marked as cancelled. If there was an associated hold allocation, it has also been marked as cancelled.", holdRequestId);
+        return mapper.toDTO(savedHoldRequest);
     }
 
     private HoldRequest findOpenHoldRequests(Long editionId) {

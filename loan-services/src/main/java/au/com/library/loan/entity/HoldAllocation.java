@@ -1,12 +1,11 @@
 package au.com.library.loan.entity;
 
 import au.com.library.loan.util.ValidationUtil;
-import au.com.library.shared.util.Numbers;
+import au.com.library.shared.exception.ConflictException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -145,20 +144,42 @@ public class HoldAllocation {
     }
 
     /**
-     * Marks this hold allocation as collected, which should only be done when the associated hold request is in the allocated state.
-     * @throws IllegalStateException if the hold request is not in the allocated state.
+     * Marks this hold allocation as collected, indicating that the member has collected the allocated edition copy. This method will set the openCopyId to null and update the status to COLLECTED.
+     * A hold allocation can only be marked as collected if the associated hold request is in the completed state and if this hold allocation is currently in the allocated state. If either of these conditions is not met, an IllegalStateException will be thrown to indicate that the hold allocation cannot be marked as collected.
+     *
+     * @throws ConflictException Thrown if the associated hold request is not in the completed state or if this hold allocation is not in the allocated state, indicating that it cannot be marked as collected.
      */
     public void markAsCollected() {
+        if(!holdRequest.getStatus().isCompleted()){
+            throw new ConflictException("Hold request must be completed to mark allocation as collected.");
+        }
         if (!status.isAllocated()) {
-            throw new IllegalStateException("Hold allocation must be allocated to be marked as collected.");
+            throw new ConflictException("Hold allocation must be allocated to be marked as collected.");
         }
         openCopyId = null;
         this.status = HoldAllocationStatus.COLLECTED;
     }
 
+    /**
+     * Marks this hold allocation as cancelled, indicating that the allocation has been cancelled and the edition copy is no longer reserved for the hold request. This method will set the openCopyId to null and update the status to CANCELLED.
+     * A hold allocation can only be marked as cancelled if the associated hold request is not in the completed state and if this hold allocation is not in the collected state. If either of these conditions is not met, an IllegalStateException will be thrown to indicate that the hold allocation cannot be marked as cancelled.
+     *
+     * @throws ConflictException If the associated hold request is in the completed state or if this hold allocation is in the collected state, indicating that it cannot be marked as cancelled.
+     */
+    public void markAsCancelled() {
+        if (holdRequest.getStatus().isCompleted()) {
+            throw new ConflictException("Hold request is already completed and therfore the allocation cannot be cancelled.");
+        }
+        if (status.isCollected()) {
+            throw new ConflictException("Hold allocation is already collected and therfore cannot be cancelled.");
+        }
+        openCopyId = null;
+        this.status = HoldAllocationStatus.CANCELLED;
+    }
+
     private HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode, LocalDateTime allocatedAt, Duration allocationDuration) {
         this.holdRequest = ValidationUtil.checkNonNullParameter(holdRequest, "HoldRequest cannot be null");
-        this.editionCopyId = (Long)ValidationUtil.checkPositiveNumber(editionCopyId, "Edition copy id must be non-null and greater than zero");
+        this.editionCopyId = (Long)ValidationUtil.checkNonNullPositiveNumber(editionCopyId, "Edition copy id must be non-null and greater than zero");
         this.barcode = ValidationUtil.checkNonNullParameter(barcode, "Barcode cannot be null");
         this.status = HoldAllocationStatus.ALLOCATED;
         this.allocatedAt = ValidationUtil.checkNonNullParameter(allocatedAt, "Allocation time cannot be null");

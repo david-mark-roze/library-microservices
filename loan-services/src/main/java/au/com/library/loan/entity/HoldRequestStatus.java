@@ -61,4 +61,11 @@ public enum HoldRequestStatus {
     public boolean isCompleted() {
         return COMPLETED.equals(this);
     }
+
+    /**
+     * Indicates that a hold request has been cancelled.
+     *
+     * @return true if the status is {@link #CANCELLED cancelled}, false otherwise.
+     */
+    public boolean isCancelled() { return CANCELLED.equals(this); }
 }
