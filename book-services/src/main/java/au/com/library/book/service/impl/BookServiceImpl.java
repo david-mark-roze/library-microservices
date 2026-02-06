@@ -1,21 +1,15 @@
 package au.com.library.book.service.impl;
 
 import au.com.library.book.dto.BookDTO;
-import au.com.library.book.dto.EditionDTO;
 import au.com.library.book.entity.Book;
-import au.com.library.book.entity.Edition;
 import au.com.library.book.repository.BookRespository;
-import au.com.library.book.repository.EditionRepository;
 import au.com.library.book.service.BookService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ResourceNotFoundException;
-import au.com.library.shared.util.Mapper;
+import au.com.library.shared.mapper.Mapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.List;
 
 /**
  * The {@link BookService} implementation.

@@ -2,7 +2,7 @@ package au.com.library.book.dto;
 
 import au.com.library.book.entity.EditionCopy;
 import au.com.library.book.entity.EditionCopyStatus;
-import au.com.library.shared.util.Mapper;
+import au.com.library.shared.mapper.Mapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

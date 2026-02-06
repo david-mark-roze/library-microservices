@@ -2,7 +2,7 @@ package au.com.library.loan.dto;
 
 import au.com.library.loan.entity.HoldRequestStatus;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record HoldRequestResultDTO(
         Long id,
@@ -16,6 +16,6 @@ public record HoldRequestResultDTO(
         String bookTitle,
         String author,
         HoldRequestStatus status,
-        LocalDate dateRequested
+        LocalDateTime requestedAt
 ) {
 }

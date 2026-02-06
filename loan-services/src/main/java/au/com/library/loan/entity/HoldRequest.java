@@ -1,11 +1,12 @@
 package au.com.library.loan.entity;
 
+import au.com.library.shared.exception.ConflictException;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * Entity representing a hold request made by a library member for a specific book edition.
@@ -68,7 +69,7 @@ public class HoldRequest {
 
     @Getter
     @Column(nullable = false)
-    private LocalDate dateRequested;
+    private LocalDateTime requestedAt;
 
     /**
      *  Unique key for identifying open hold requests for a specific edition and member.
@@ -159,8 +160,38 @@ public class HoldRequest {
         this.bookTitle = bookTitle;
         this.author = author;
         this.edition = edition;
-        this.dateRequested = LocalDate.now();
+        this.requestedAt = LocalDateTime.now();
         this.status = HoldRequestStatus.ACTIVE;
         this.openHoldKey = String.format(HOLD_KEY_FORMAT, editionId, memberId);
+    }
+
+    /**
+     * Indicates whether this hold request has been allocated to a copy. A hold request is considered allocated if it has an associated {@link HoldAllocation hold allocation}.
+     * @return true if the hold request has an associated hold allocation, false otherwise.
+     */
+    public boolean hasAllocation() {
+        return allocation != null;
+    }
+
+    /**
+     * Marks this hold request as allocated by updating its status to {@link HoldRequestStatus#ALLOCATED allocated}.
+     * This method should be called just before creating a corresponding {@link HoldAllocation hold allocation} for this hold request to ensure the status is updated in the same transaction as the allocation creation.
+     */
+    public void markAsAllocated() {
+        if(!status.isActive()){
+            throw new ConflictException(String.format("Hold request with ID %d cannot be marked as allocated because its current status is %s.", id, status));
+        }
+        this.status = HoldRequestStatus.ALLOCATED;
+    }
+
+    /**
+     * Marks this hold request as completed by updating its status to {@link HoldRequestStatus#COMPLETED completed}.
+     * This method should be called just before the member collects the allocated edition copy for loaning to indicate that the hold request has been fulfilled.
+     */
+    public void markAsCompleted() {
+        if(!status.isAllocated()){
+            throw new ConflictException(String.format("Hold request with ID %d cannot be marked as completed because its current status is %s.", id, status));
+        }
+        this.status = HoldRequestStatus.COMPLETED;
     }
 }

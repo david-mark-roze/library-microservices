@@ -26,7 +26,7 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<ErrorDetails> handleCopyUnavailableException(CopyUnavailableException exception, WebRequest request) {
         ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), exception.getMessage(), request.getDescription(false), "COPY_UNAVAILABLE");
-        return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
 
     /**
@@ -87,5 +87,21 @@ public class ServiceExceptionHandler extends ResponseEntityExceptionHandler {
                 request.getDescription(false),
                 "CONFLICT");
         return new ResponseEntity<>(errorDetails, HttpStatus.CONFLICT);
+    }
+
+    /**
+     * Handles a {@link BlockedLoanException} which is thrown when a loan creation request is blocked due to an active hold request for another member.
+     * @param exception A reference to the {@link BlockedLoanException} object.
+     * @param request The {@link WebRequest} object.
+     * @return The {@link ResponseEntity} object containing the error details.
+     */
+    @ExceptionHandler
+    public ResponseEntity<ErrorDetails> handleBlockedLoanException(BlockedLoanException exception, WebRequest request) {
+        ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                exception.getMessage(),
+                request.getDescription(false),
+                "LOAN_BLOCKED");
+        return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
     }
 }

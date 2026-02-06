@@ -13,6 +13,7 @@ import lombok.Setter;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EditionCopySnapshotDTO {
 
+    private Long id;
     private String barcode;
     private EditionCopyStatus status;
     private Long editionId;

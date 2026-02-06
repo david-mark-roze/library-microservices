@@ -9,23 +9,28 @@ import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
 import au.com.library.loan.exception.CopyUnavailableException;
 import au.com.library.loan.repository.LoanRepository;
+import au.com.library.loan.service.HoldRequestService;
 import au.com.library.loan.service.LoanService;
+import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
-import au.com.library.shared.util.Mapper;
+import au.com.library.shared.mapper.Mapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 import static au.com.library.contracts.event.loan.LoanEventType.*;
 
 /**
- * The {@link LoanService} implementation.
+ * Implementation of the {@link LoanService} interface.
  */
 @RequiredArgsConstructor
 @Service
@@ -37,8 +42,8 @@ public class LoanServiceImpl implements LoanService {
     private final MemberClient memberClient;
 
     private final ApplicationEventPublisher eventPublisher;
-
-    private final LoanRepository repository;
+    private final HoldRequestService holdRequestService;
+    private final LoanRepository loanRepository;
 
     @Value("${loan.period-days}")
     private int loanPeriodDays;
@@ -56,12 +61,16 @@ public class LoanServiceImpl implements LoanService {
     @Override
     @Transactional
     public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
-
+        Optional<Loan> activeLoan = loanRepository.findActiveLoanForEditionCopy(loanRequestDTO.getEditionCopyId());
+        if(activeLoan.isPresent()){
+            throw new CopyUnavailableException("The copy of the book requested is already on loan and is not currently available");
+        }
         EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.getEditionCopyId());
         MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.getMemberId());
         EditionSnapshotDTO edition = bookClient.findEdition(copy.getEditionId());
         BookSnapshotDTO book = bookClient.findBook(edition.getBookId());
 
+        holdRequestService.loanCreationHoldChecking(copy, member.getId());
         Loan loan = Loan.builder().
                 editionCopyId(loanRequestDTO.getEditionCopyId()).
                 bookTitle(book.getTitle()).
@@ -99,7 +108,7 @@ public class LoanServiceImpl implements LoanService {
             throw new ConflictException("The maximum number of renewals has been reached for this loan");
         }
         loan.renewLoan(loanPeriodDays);
-        Loan renewed = repository.save(loan);
+        Loan renewed = loanRepository.save(loan);
         return Mapper.map(renewed, LoanResponseDTO.class);
     }
 
@@ -117,7 +126,7 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.returnLoan();
-        Loan saved = repository.save(loan);
+        Loan saved = loanRepository.save(loan);
         eventPublisher.publishEvent(loanReturnedEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
@@ -136,7 +145,7 @@ public class LoanServiceImpl implements LoanService {
     public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.markLost();
-        Loan saved = repository.save(loan);
+        Loan saved = loanRepository.save(loan);
         eventPublisher.publishEvent(loanLostEvent(saved));
         return Mapper.map(saved, LoanResponseDTO.class);
     }
@@ -178,7 +187,7 @@ public class LoanServiceImpl implements LoanService {
 
     private Loan findById(Long id){
         validateId(id);
-        return repository.findById(id).
+        return loanRepository.findById(id).
                 orElseThrow(
                         ()-> new ResourceNotFoundException(String.format("The loan with the id %s could not be found", id)
                         )
@@ -187,11 +196,14 @@ public class LoanServiceImpl implements LoanService {
 
     private Loan saveNewLoan(Loan loan) throws CopyUnavailableException {
         try {
-            return repository.save(loan);
-        } catch (ConstraintViolationException e) {
-            // Will occur when a unique constraint is violated i.e. a loan is active for the specified edition copy
+            return loanRepository.save(loan);
+        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
+            // Will occur when the edition copy is already on loan and the unique constraint on openCopyId is violated.
             LOGGER.error(e.getMessage(), e);
-            throw new CopyUnavailableException("The copy of the book requested is unavailable");
+            throw new CopyUnavailableException("The copy of the book requested is already on loan and is not currently available");
+        } catch (Exception e){
+            LOGGER.error(e.getMessage(), e);
+            throw new BadRequestException(e.getMessage());
         }
     }
 }

@@ -7,7 +7,7 @@ import au.com.library.member.repository.MemberRepository;
 import au.com.library.member.service.MemberService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ResourceNotFoundException;
-import au.com.library.shared.util.Mapper;
+import au.com.library.shared.mapper.Mapper;
 import lombok.AllArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.stereotype.Service;

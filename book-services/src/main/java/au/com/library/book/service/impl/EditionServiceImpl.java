@@ -7,14 +7,13 @@ import au.com.library.book.repository.BookRespository;
 import au.com.library.book.repository.EditionRepository;
 import au.com.library.book.service.EditionService;
 import au.com.library.shared.exception.ResourceNotFoundException;
-import au.com.library.shared.util.Mapper;
+import au.com.library.shared.mapper.Mapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 /**
  * The {@link EditionService} implementation.

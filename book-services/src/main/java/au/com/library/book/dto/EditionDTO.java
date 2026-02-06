@@ -2,11 +2,7 @@ package au.com.library.book.dto;
 
 import au.com.library.book.entity.BookFormat;
 import au.com.library.book.entity.Edition;
-import au.com.library.shared.util.Mapper;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import au.com.library.shared.mapper.Mapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

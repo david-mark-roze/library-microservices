@@ -1,4 +1,4 @@
-package au.com.library.shared.util;
+package au.com.library.shared.mapper;
 
 /**
  * A simple mapper interface for converting between Entity and DTO objects.

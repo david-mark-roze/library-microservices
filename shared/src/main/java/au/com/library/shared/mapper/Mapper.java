@@ -1,4 +1,4 @@
-package au.com.library.shared.util;
+package au.com.library.shared.mapper;
 
 import org.modelmapper.ModelMapper;
 
