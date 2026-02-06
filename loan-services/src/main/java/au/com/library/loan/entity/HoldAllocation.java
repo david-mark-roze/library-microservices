@@ -1,5 +1,6 @@
 package au.com.library.loan.entity;
 
+import au.com.library.loan.util.ValidationUtil;
 import au.com.library.shared.util.Numbers;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -156,27 +157,17 @@ public class HoldAllocation {
     }
 
     private HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode, LocalDateTime allocatedAt, Duration allocationDuration) {
-        this.holdRequest = checkNonNullParameter(holdRequest, "HoldRequest cannot be null");
-        this.editionCopyId = (Long)checkValidNumber(editionCopyId, "Edition copy id must be non-null and greater than zero");
-        this.barcode = checkNonNullParameter(barcode, "Barcode cannot be null");
+        this.holdRequest = ValidationUtil.checkNonNullParameter(holdRequest, "HoldRequest cannot be null");
+        this.editionCopyId = (Long)ValidationUtil.checkPositiveNumber(editionCopyId, "Edition copy id must be non-null and greater than zero");
+        this.barcode = ValidationUtil.checkNonNullParameter(barcode, "Barcode cannot be null");
         this.status = HoldAllocationStatus.ALLOCATED;
-        this.allocatedAt = checkNonNullParameter(allocatedAt, "Allocation time cannot be null");
+        this.allocatedAt = ValidationUtil.checkNonNullParameter(allocatedAt, "Allocation time cannot be null");
         this.openCopyId = editionCopyId;
         this.expiryDate = allocatedAt.plus(
-                checkNonNullParameter(
+                        ValidationUtil.checkNonNullParameter(
                         allocationDuration,
                         "Allocation duration cannot be null"))
                 .toLocalDate();
-    }
-
-    private <T> T checkNonNullParameter(T object, String message){
-        return Objects.requireNonNullElseGet(object, () -> {;
-            throw new IllegalArgumentException(message);
-        });
-    }
-
-    private Number checkValidNumber(Number number, String message){
-        return Numbers.isNonNullPositiveOrElseThrow(number, ()-> new IllegalArgumentException(message));
     }
 
 }

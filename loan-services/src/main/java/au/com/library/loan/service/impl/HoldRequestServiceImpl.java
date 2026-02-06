@@ -132,6 +132,9 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     }
 
     private void allocateHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot) throws BlockedLoanException {
+        if(holdRequest.hasAllocation()){
+            throw new ConflictException("The hold request already has an allocation and cannot be allocated again.");
+        }
         holdRequest.markAsAllocated();
         var allocation = HoldAllocation.builder()
                 .holdRequest(holdRequest)
