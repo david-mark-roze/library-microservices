@@ -43,7 +43,7 @@ public interface HoldRequestRepository extends JpaRepository<HoldRequest, Long> 
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(ACTIVE_HOLD_REQUESTS_BY_EDITION_ID_QUERY)
-    List<HoldRequest> lockedActiveHeadHoldRequest(
+    List<HoldRequest> findActiveHoldRequestForUpdate(
             @Param("editionId") Long editionId,
             Pageable pageable
     );
@@ -59,7 +59,7 @@ public interface HoldRequestRepository extends JpaRepository<HoldRequest, Long> 
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(OPEN_HOLD_REQUESTS_BY_EDITION_ID_QUERY)
-    List<HoldRequest> lockedOpenHoldRequestsByEditionId(
+    List<HoldRequest> findOpenHoldRequestsByEditionIdForUpdate(
             @Param("editionId") Long editionId,
             Pageable pageable
     );

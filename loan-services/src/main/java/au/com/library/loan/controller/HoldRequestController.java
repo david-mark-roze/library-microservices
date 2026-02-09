@@ -6,10 +6,7 @@ import au.com.library.loan.service.HoldRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Handles REST API requests for library loan hold requests.
@@ -31,5 +28,18 @@ public class HoldRequestController {
     public ResponseEntity<HoldRequestResultDTO> placeHoldRequest(@RequestBody HoldRequestInputDTO holdRequestInput) {
         HoldRequestResultDTO result = service.placeHoldRequest(holdRequestInput.memberId(), holdRequestInput.editionId());
         return new ResponseEntity<HoldRequestResultDTO>(result, HttpStatus.CREATED);
+    }
+
+    /**
+     * Handles a REST API POST for cancelling a hold request.
+     *
+     * @param id The id of the hold request to cancel.
+     * @return A {@link ResponseEntity} containing a {@link HoldRequestResultDTO}
+     * object containing details of the canceled hold request.
+     */
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<HoldRequestResultDTO> cancelHoldRequest(@PathVariable Long id) {
+        HoldRequestResultDTO result = service.cancelHoldRequest(id);
+        return ResponseEntity.ok(result);
     }
 }

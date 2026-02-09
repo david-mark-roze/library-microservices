@@ -53,6 +53,8 @@ public class HoldAllocation {
     private LocalDateTime allocatedAt;
 
     @Getter
+    private LocalDate endDate;
+    @Getter
     private LocalDate expiryDate;
 
     private Long openCopyId;
@@ -149,7 +151,7 @@ public class HoldAllocation {
      *
      * @throws ConflictException Thrown if the associated hold request is not in the completed state or if this hold allocation is not in the allocated state, indicating that it cannot be marked as collected.
      */
-    public void markAsCollected() {
+    public void collect() {
         if(!holdRequest.getStatus().isCompleted()){
             throw new ConflictException("Hold request must be completed to mark allocation as collected.");
         }
@@ -158,6 +160,7 @@ public class HoldAllocation {
         }
         openCopyId = null;
         this.status = HoldAllocationStatus.COLLECTED;
+        this.endDate = LocalDate.now();
     }
 
     /**
@@ -166,7 +169,7 @@ public class HoldAllocation {
      *
      * @throws ConflictException If the associated hold request is in the completed state or if this hold allocation is in the collected state, indicating that it cannot be marked as cancelled.
      */
-    public void markAsCancelled() {
+    public void cancel() {
         if (holdRequest.getStatus().isCompleted()) {
             throw new ConflictException("Hold request is already completed and therfore the allocation cannot be cancelled.");
         }
@@ -175,6 +178,26 @@ public class HoldAllocation {
         }
         openCopyId = null;
         this.status = HoldAllocationStatus.CANCELLED;
+        this.endDate = LocalDate.now();
+    }
+
+    /**
+     * Marks this hold allocation as expired, indicating that the member did not
+     * collect the allocated edition copy within the allocated time frame. This method will set
+     * the openCopyId to null and update the {@link HoldAllocationStatus status} to {@link HoldAllocationStatus#EXPIRED expired}.
+     *
+     * @throws ConflictException Thrown if this hold allocation is not currently in the allocated state, indicating that it cannot be marked as expired.
+     */
+    public void expire() {
+        if (!status.isAllocated()) {
+            throw new ConflictException("Hold allocation must be allocated to be marked as expired.");
+        }
+        openCopyId = null;
+        this.status = HoldAllocationStatus.EXPIRED;
+        this.endDate = LocalDate.now();
+
+        HoldRequest holdRequest = getHoldRequest();
+        holdRequest.expire();
     }
 
     private HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode, LocalDateTime allocatedAt, Duration allocationDuration) {

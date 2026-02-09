@@ -115,12 +115,10 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         Long finalHoldRequestId  = (Long)ValidationUtil.checkNonNullPositiveNumber(holdRequestId, "Hold Request ID must be a non null positive number.");
 
         HoldRequest holdRequest = holdRequestRepository.findById(holdRequestId).orElseThrow(() -> new ResourceNotFoundException(String.format("Hold request with ID %d could not be found.", finalHoldRequestId)));
-        holdRequest.markAsCancelled();
-
+        holdRequest.cancel();
         HoldAllocation allocation = null;
         if(holdRequest.hasAllocation()){
             allocation = holdRequest.getAllocation();
-            allocation.markAsCancelled();
         }
         HoldRequest savedHoldRequest = holdRequestRepository.save(holdRequest);
         if(allocation != null){
@@ -131,7 +129,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     }
 
     private HoldRequest findOpenHoldRequests(Long editionId) {
-        List<HoldRequest> holdRequests = holdRequestRepository.lockedOpenHoldRequestsByEditionId(editionId, PageRequest.of(0, 1));
+        List<HoldRequest> holdRequests = holdRequestRepository.findOpenHoldRequestsByEditionIdForUpdate(editionId, PageRequest.of(0, 1));
         if (!holdRequests.isEmpty()) {
             return holdRequests.get(0);
         }
@@ -139,7 +137,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     }
 
     private HoldRequest findActiveHoldRequest(Long editionId) {
-        List<HoldRequest> holdRequests = holdRequestRepository.lockedActiveHeadHoldRequest(editionId, PageRequest.of(0, 1));
+        List<HoldRequest> holdRequests = holdRequestRepository.findActiveHoldRequestForUpdate(editionId, PageRequest.of(0, 1));
         if (!holdRequests.isEmpty()) {
             return holdRequests.get(0);
         }
@@ -150,7 +148,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         if(holdRequest.hasAllocation()){
             throw new ConflictException("The hold request already has an allocation and cannot be allocated again.");
         }
-        holdRequest.markAsAllocated();
+        holdRequest.allocate();
         var allocation = HoldAllocation.builder()
                 .holdRequest(holdRequest)
                 .editionCopyId(editionCopySnapshot.getId())
@@ -163,9 +161,9 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     }
 
     private void handleAllocatedHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {
-        holdRequest.markAsCompleted();
+        holdRequest.complete();
         var allocation = holdRequest.getAllocation();
-        allocation.markAsCollected();
+        allocation.collect();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
         LOGGER.info("Hold request with ID {0} has been marked as completed and the associated hold allocation has been marked as collected for member ID {1} and edition ID {2}.", holdRequest.getId(), memberId, editionCopySnapshot.getEditionId());

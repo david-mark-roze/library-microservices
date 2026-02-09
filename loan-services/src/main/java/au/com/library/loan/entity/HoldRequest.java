@@ -243,7 +243,7 @@ public class HoldRequest {
      * Marks this hold request as allocated by updating its status to {@link HoldRequestStatus#ALLOCATED allocated}.
      * This method should be called just before creating a corresponding {@link HoldAllocation hold allocation} for this hold request to ensure the status is updated in the same transaction as the allocation creation.
      */
-    public void markAsAllocated() {
+    public void allocate() {
         if(!status.isActive()){
             throw new ConflictException(String.format("Hold request with ID %d cannot be marked as allocated because its current status is %s.", id, status));
         }
@@ -252,25 +252,48 @@ public class HoldRequest {
 
     /**
      * Marks this hold request as completed by updating its status to {@link HoldRequestStatus#COMPLETED completed}.
-     * This method should be called just before the member collects the allocated edition copy for loaning to indicate that the hold request has been fulfilled.
+     * A hold request can only be marked as completed if it is currently allocated. If the hold request is not allocated, it cannot be marked as completed and a {@link ConflictException} will be thrown.
+     *
+     * @throws ConflictException Thrown if the hold request is not currently allocated, indicating that it cannot be marked as completed.
      */
-    public void markAsCompleted() {
+    public void complete() {
         if(!status.isAllocated()){
             throw new ConflictException(String.format("Hold request with ID %d cannot be marked as completed because its current status is %s.", id, status));
         }
         this.status = HoldRequestStatus.COMPLETED;
+        allocation = getAllocation();
+        allocation.collect();
         this.openHoldKey = null;
     }
 
     /**
-     * Marks this hold request as cancelled by updating its status to {@link HoldRequestStatus#CANCELLED cancelled}.
-     * A hold request can be cancelled if it is currently active or allocated. If the hold request is already completed, it cannot be cancelled and a ConflictException will be thrown.
+     * Marks this hold request as canceled by updating its status to {@link HoldRequestStatus#CANCELLED cancelled} and setting the openHoldKey to null. If this hold request has an associated allocation, it will also be marked as canceled.
+     * A hold request cannot be marked as canceled if it has already been completed, and a {@link ConflictException} will be thrown in that case.
+     * @throws ConflictException Thrown if the hold request has already been completed, indicating that it cannot be marked as canceled.
      */
-    public void markAsCancelled() {
+    public void cancel() {
         if(status.isCompleted()){
             throw new ConflictException(String.format("Hold request with ID %d cannot be marked as cancelled because it has already been completed.", id));
         }
         this.status = HoldRequestStatus.CANCELLED;
+        this.openHoldKey = null;
+        if(hasAllocation()){
+            allocation = getAllocation();
+            allocation.cancel();
+        }
+    }
+
+
+    /**
+     * This method will be called by the {@link HoldAllocation#expire()} method when a hold allocation expires, given that a hold request can only be marked as expired if it is currently allocated.
+     * This method will update the status of this hold request to {@link HoldRequestStatus#EXPIRED expired} and set its openHoldKey to null.
+     * @throws ConflictException Thrown if the hold request is not currently allocated, indicating that it cannot be marked as expired.
+     */
+    void expire() {
+        if(!status.isAllocated()){
+            throw new ConflictException(String.format("Hold request with ID %d cannot be marked as expired because its current status is %s.", id, status));
+        }
+        this.status = HoldRequestStatus.EXPIRED;
         this.openHoldKey = null;
     }
 }
