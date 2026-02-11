@@ -25,6 +25,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static au.com.library.contracts.event.loan.LoanEventType.*;
@@ -80,8 +82,8 @@ public class LoanServiceImpl implements LoanService {
                 memberId(member.getId()).
                 memberFirstName(member.getFirstName()).
                 memberLastName(member.getLastName()).
+                loanDuration(Duration.of(loanPeriodDays, ChronoUnit.DAYS)).
                 build();
-        loan.calculateDueDate(loanPeriodDays);
         Loan saved = saveNewLoan(loan);
         // Publish loan created event for all registered listeners.
         eventPublisher.publishEvent(loanCreatedEvent(saved));
@@ -92,7 +94,7 @@ public class LoanServiceImpl implements LoanService {
      * Renews an existing loan.
      * @param id The id of the loan to renew.
      * @return A {@link LoanResponseDTO} containing details of the renewed loan.
-     * @throws ConflictException
+     * @throws ConflictException Thrown if the loan is not in a state that allows it to be renewed or has exceeded the maximum number of renewals.
      * @throws ResourceNotFoundException Thrown if the loan with the specified id could not be found.
      * @throws IllegalArgumentException Thrown if the provided id is null or not a positive non-zero value.
      */
@@ -107,7 +109,7 @@ public class LoanServiceImpl implements LoanService {
         if(loan.getRenewalCount() >= renewalLimit){
             throw new ConflictException("The maximum number of renewals has been reached for this loan");
         }
-        loan.renewLoan(loanPeriodDays);
+        loan.renewLoan(Duration.of(loanPeriodDays, ChronoUnit.DAYS));
         Loan renewed = loanRepository.save(loan);
         return Mapper.map(renewed, LoanResponseDTO.class);
     }

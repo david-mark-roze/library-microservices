@@ -18,7 +18,8 @@ public interface HoldAllocationService {
     void expireAllocations();
 
     /**
-     * Expires a specific hold allocation. This method is intended to be called by the scheduled task that processes expired allocations.
+     * Expires a specific hold allocation. This method is intended to be called by the
+     * scheduled task that processes expired allocations.
      *
      * @param id The ID of the hold allocation to expire.
      */

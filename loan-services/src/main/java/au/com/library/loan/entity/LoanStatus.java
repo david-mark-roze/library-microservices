@@ -40,7 +40,7 @@ public enum LoanStatus {
     }
 
     /**
-     * Indicates that the loan is currently active (either BORROWED or RENEWED).
+     * Indicates that the loan is currently active (either {@link #BORROWED borrowed} or {@link #RENEWED renewed}).
      *
      * @return true if the loan is active, false otherwise.
      */
