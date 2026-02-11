@@ -24,19 +24,20 @@ public interface HoldAllocationRepository extends JpaRepository<HoldAllocation, 
     static final String FIND_ALLOCATION_QUERY = "select ha from HoldAllocation ha where ha.id = :id";
 
     /**
-     * Returns a list of IDs for all {@link HoldAllocation} entities that have expired. An allocation is considered expired if its expiry date is before the current date and its status is {@link HoldAllocationStatus#ALLOCATED allocated}.
-     * Will be used by a scheduled task to identify expired allocations and update their status to {@link HoldAllocationStatus#EXPIRED expired} and set their expiry date to the current date.
+     * Returns a list of IDs for all {@link HoldAllocation} entities that have expired. In this context, an allocation is considered expired if its expiry date is before the current date and its status is {@link HoldAllocationStatus#ALLOCATED allocated}.
+     * Will be used by a scheduled task to identify expired allocations and update their status to {@link HoldAllocationStatus#EXPIRED expired}.
      * @return A list of IDs for all expired {@link HoldAllocation} entities. Otherwise, an empty list.
      */
     @Query(EXPIRED_ALLOCATIONS_QUERY)
     List<Long> findExpired();
 
     /**
-     * Retrieves a {@link HoldAllocation} entity by its ID and applies a pessimistic write lock to it. This method is used to ensure that the retrieved {@link HoldAllocation} entity is locked for update, preventing concurrent modifications by other transactions until the current transaction is completed.
-     * @param id The ID of the {@link HoldAllocation} entity to retrieve and lock for update.
-     * @return An {@link Optional} containing the {@link HoldAllocation} entity with the specified ID if it exists, or an empty Optional if no such entity exists. The retrieved entity will be locked for update, preventing concurrent modifications by other transactions until the current transaction is completed.
+     * Retrieves an {@link HoldAllocationStatus#ALLOCATED allocated} {@link HoldAllocation} entity by its ID and applies a pessimistic write lock to it.
+     * This ensures that the retrieved {@link HoldAllocation} entity is locked for update, preventing concurrent modifications by other transactions until the current transaction is completed.
+     * @param id The ID of allocated the {@link HoldAllocation} entity to retrieve and lock for update.
+     * @return An {@link Optional} containing the allocated {@link HoldAllocation} entity with the specified ID if it exists, or an empty {@link Optional} if no such entity exists.
      */
     @Query(FIND_ALLOCATION_QUERY)
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<HoldAllocation> findByIdForUpdate(Long id);
+    Optional<HoldAllocation> findAllocatedByIdForUpdate(Long id);
 }
