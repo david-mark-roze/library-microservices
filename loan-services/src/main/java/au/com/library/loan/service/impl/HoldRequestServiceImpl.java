@@ -55,18 +55,18 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         editionId = (Long)ValidationUtil.checkNonNullPositiveNumber(editionId, "Edition ID must be a non null positive number.");
 
         EditionSnapshotDTO editionSnapshot = bookClient.findEdition(editionId);
-        BookSnapshotDTO bookSnapshot = bookClient.findBook(editionSnapshot.getBookId());
+        BookSnapshotDTO bookSnapshot = bookClient.findBook(editionSnapshot.bookId());
         MemberSnapshotDTO memberSnapshot = memberClient.findMember(memberId);
         HoldRequest holdRequest = HoldRequest.builder()
-                .editionId(editionSnapshot.getId())
-                .edition(editionSnapshot.getEdition())
-                .bookTitle(bookSnapshot.getTitle())
-                .author(bookSnapshot.getAuthor())
-                .memberId(memberSnapshot.getId())
-                .memberFirstName(memberSnapshot.getFirstName())
-                .memberLastName(memberSnapshot.getLastName())
-                .email(memberSnapshot.getEmail())
-                .phone(memberSnapshot.getPhone())
+                .editionId(editionSnapshot.id())
+                .edition(editionSnapshot.edition())
+                .bookTitle(bookSnapshot.title())
+                .author(bookSnapshot.author())
+                .memberId(memberSnapshot.id())
+                .memberFirstName(memberSnapshot.firstName())
+                .memberLastName(memberSnapshot.lastName())
+                .email(memberSnapshot.email())
+                .phone(memberSnapshot.phone())
                 .build();
         try {
             HoldRequest savedHoldRequest = holdRequestRepository.save(holdRequest);
@@ -82,10 +82,10 @@ public class HoldRequestServiceImpl implements HoldRequestService {
 
     @Override
     public void loanCreationHoldChecking(EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {
-        HoldRequest holdRequest = findOpenHoldRequests(editionCopySnapshot.getEditionId());
+        HoldRequest holdRequest = findOpenHoldRequests(editionCopySnapshot.editionId());
         // If there are no open hold requests for the edition, the loan creation can proceed without hold restrictions
         if(holdRequest == null){
-            LOGGER.info("No open hold requests found for edition ID {0}. Loan creation can proceed without hold restrictions.", editionCopySnapshot.getEditionId());
+            LOGGER.info("No open hold requests found for edition ID {0}. Loan creation can proceed without hold restrictions.", editionCopySnapshot.editionId());
             return;
         }
         // If there is an open hold request for the edition, check if it belongs to the member attempting to create the loan. If it does, the loan creation can proceed but the hold request status needs to be updated accordingly.
@@ -104,7 +104,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
 
     @Override
     public void loanReturnAllocation(EditionCopySnapshotDTO editionCopySnapshot) {
-        HoldRequest holdRequest = findActiveHoldRequest(editionCopySnapshot.getEditionId());
+        HoldRequest holdRequest = findActiveHoldRequest(editionCopySnapshot.editionId());
         if (holdRequest != null) {
             allocateHoldRequest(holdRequest, editionCopySnapshot);
         }
@@ -131,7 +131,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     private HoldRequest findOpenHoldRequests(Long editionId) {
         List<HoldRequest> holdRequests = holdRequestRepository.findOpenHoldRequestsByEditionIdForUpdate(editionId, PageRequest.of(0, 1));
         if (!holdRequests.isEmpty()) {
-            return holdRequests.get(0);
+            return holdRequests.getFirst();
         }
         return null;
     }
@@ -139,7 +139,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     private HoldRequest findActiveHoldRequest(Long editionId) {
         List<HoldRequest> holdRequests = holdRequestRepository.findActiveHoldRequestForUpdate(editionId, PageRequest.of(0, 1));
         if (!holdRequests.isEmpty()) {
-            return holdRequests.get(0);
+            return holdRequests.getFirst();
         }
         return null;
     }
@@ -151,13 +151,13 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         holdRequest.allocate();
         var allocation = HoldAllocation.builder()
                 .holdRequest(holdRequest)
-                .editionCopyId(editionCopySnapshot.getId())
-                .barcode(editionCopySnapshot.getBarcode())
+                .editionCopyId(editionCopySnapshot.id())
+                .barcode(editionCopySnapshot.barcode())
                 .allocationDuration(Duration.of(loanHoldPeriodDays, ChronoUnit.DAYS))
                 .build();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
-        LOGGER.info("Hold request with ID {0} has been marked as allocated and a new hold allocation has been created for edition ID {1}.", holdRequest.getId(), editionCopySnapshot.getEditionId());
+        LOGGER.info("Hold request with ID {0} has been marked as allocated and a new hold allocation has been created for edition ID {1}.", holdRequest.getId(), editionCopySnapshot.editionId());
     }
 
     private void handleAllocatedHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {
@@ -166,6 +166,6 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         allocation.collect();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
-        LOGGER.info("Hold request with ID {0} has been marked as completed and the associated hold allocation has been marked as collected for member ID {1} and edition ID {2}.", holdRequest.getId(), memberId, editionCopySnapshot.getEditionId());
+        LOGGER.info("Hold request with ID {0} has been marked as completed and the associated hold allocation has been marked as collected for member ID {1} and edition ID {2}.", holdRequest.getId(), memberId, editionCopySnapshot.editionId());
     }
 }

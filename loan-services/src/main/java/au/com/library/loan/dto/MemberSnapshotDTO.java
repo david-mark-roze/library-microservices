@@ -1,21 +1,14 @@
 package au.com.library.loan.dto;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MemberSnapshotDTO {
-
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phone;
+public record MemberSnapshotDTO(
+         Long id,
+         String firstName,
+         String lastName,
+         String email,
+         String phone
+        ) {
 }

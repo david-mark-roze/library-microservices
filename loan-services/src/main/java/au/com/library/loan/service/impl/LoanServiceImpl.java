@@ -70,19 +70,19 @@ public class LoanServiceImpl implements LoanService {
         }
         EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.editionCopyId());
         MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.memberId());
-        EditionSnapshotDTO edition = bookClient.findEdition(copy.getEditionId());
-        BookSnapshotDTO book = bookClient.findBook(edition.getBookId());
+        EditionSnapshotDTO edition = bookClient.findEdition(copy.editionId());
+        BookSnapshotDTO book = bookClient.findBook(edition.bookId());
 
-        holdRequestService.loanCreationHoldChecking(copy, member.getId());
+        holdRequestService.loanCreationHoldChecking(copy, member.id());
         Loan loan = Loan.builder().
                 editionCopyId(loanRequestDTO.editionCopyId()).
-                bookTitle(book.getTitle()).
-                author(book.getAuthor()).
-                edition(edition.getEdition()).
-                barcode(copy.getBarcode()).
-                memberId(member.getId()).
-                memberFirstName(member.getFirstName()).
-                memberLastName(member.getLastName()).
+                bookTitle(book.title()).
+                author(book.author()).
+                edition(edition.edition()).
+                barcode(copy.barcode()).
+                memberId(member.id()).
+                memberFirstName(member.firstName()).
+                memberLastName(member.lastName()).
                 loanPeriod(Period.ofDays(loanPeriodDays)).
                 build();
         Loan saved = saveNewLoan(loan);

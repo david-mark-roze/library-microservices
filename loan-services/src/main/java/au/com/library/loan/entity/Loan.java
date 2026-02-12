@@ -210,7 +210,7 @@ public class Loan {
      *
      * @param loanPeriod The period by which to extend the loan's due date. Must not be null or negative.
      * @throws ConflictException        Thrown when the loan is not in a state that allows renewal.
-     * @throws IllegalArgumentException Thrown when the specified loan duration null or has a negative duration.
+     * @throws IllegalArgumentException Thrown when the specified loan period is null or negative.
      */
     public void renewLoan(Period loanPeriod){
         ValidationUtil.checkNonNullParameter(loanPeriod, "Loan period must not be null");
