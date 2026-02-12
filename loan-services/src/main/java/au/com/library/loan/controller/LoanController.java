@@ -1,6 +1,7 @@
 package au.com.library.loan.controller;
 
 import au.com.library.loan.dto.LoanRequestDTO;
+import au.com.library.loan.dto.LoanDTO;
 import au.com.library.loan.dto.LoanResponseDTO;
 import au.com.library.loan.service.LoanService;
 import lombok.AllArgsConstructor;
@@ -22,11 +23,11 @@ public class LoanController {
      * Handles a REST API POST for creating a library book loan.
      *
      * @param loanRequestDTO A {@link LoanRequestDTO} object containing the data required for creating a loan.
-     * @return A {@link ResponseEntity} containing a  {@link LoanResponseDTO} object containing details of the new loan.
+     * @return A {@link ResponseEntity} containing a  {@link LoanDTO} object containing details of the new loan.
      */
     @PostMapping
-    public ResponseEntity<LoanResponseDTO> createLoan(@RequestBody LoanRequestDTO loanRequestDTO){
-        return new ResponseEntity<LoanResponseDTO>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
+    public ResponseEntity<LoanDTO> createLoan(@RequestBody LoanRequestDTO loanRequestDTO){
+        return new ResponseEntity<LoanDTO>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
     }
     /**
      * Handles a REST API POST for returning a loan.
@@ -62,7 +63,7 @@ public class LoanController {
      * the details of the returned loan.
      */
     @GetMapping("/{id}")
-    public ResponseEntity<LoanResponseDTO> findLoan(@PathVariable Long id){
+    public ResponseEntity<LoanDTO> findLoan(@PathVariable Long id){
         return ResponseEntity.ok(service.find(id));
     }
 

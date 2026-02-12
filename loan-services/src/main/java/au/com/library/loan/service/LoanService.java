@@ -1,6 +1,7 @@
 package au.com.library.loan.service;
 
 import au.com.library.loan.dto.LoanRequestDTO;
+import au.com.library.loan.dto.LoanDTO;
 import au.com.library.loan.dto.LoanResponseDTO;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.exception.CopyUnavailableException;
@@ -26,14 +27,14 @@ public interface LoanService {
      *  These will be used, along additional data from the book and member services, to create a {@link au.com.library.loan.entity.Loan loan}.
      *
      * @param loanRequestDTO A {@link LoanRequestDTO} object containing the above data.
-     * @return A {@link LoanResponseDTO} object containing the new loan details.
+     * @return A {@link LoanDTO} object containing the new loan details.
      * @throws CopyUnavailableException Thrown when the request copy of a book is unavailable.
      */
-    LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException;
+    LoanDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException;
 
     /**
-     * Handles the renewal of an existing loan. A renewal may only be performed if the loan is current (i.e {@link au.com.library.loan.entity.LoanStatus#BORROWED borrowed} or
-     * {@link#LoanStatus#RENEWED renewed}) and has not exceeded the maximum number of renewals.
+     * Handles the renewal of an existing loan. A renewal may only be performed if the loan is current (i.e. {@link au.com.library.loan.entity.LoanStatus#BORROWED borrowed} or
+     * {@link au.com.library.loan.entity.LoanStatus#RENEWED renewed}) and has not exceeded the maximum number of renewals.
      * @param id The id of the loan to renew.
      * @return A {@link LoanResponseDTO} object containing details of the renewed loan.
      * @throws ConflictException Thrown when the loan is not in a state that allows renewal or has exceeded the maximum number of renewals.
@@ -66,9 +67,9 @@ public interface LoanService {
     /**
      * Handles a query to find a {@link au.com.library.loan.entity.Loan loan} by its id.
      * @param id The loan id.
-     * @return A {@link LoanResponseDTO} object containing the loan details.
+     * @return A {@link LoanDTO} object containing the loan details.
      * @throws au.com.library.shared.exception.ResourceNotFoundException Thrown when the loan details could not be found.
      * @throws IllegalArgumentException Thrown when the specified loan id is null or less than or equal to zero.
      */
-    LoanResponseDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException;
+    LoanDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException;
 }

@@ -8,6 +8,7 @@ import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
 import au.com.library.loan.exception.CopyUnavailableException;
+import au.com.library.loan.mapper.LoanMapper;
 import au.com.library.loan.repository.LoanRepository;
 import au.com.library.loan.service.HoldRequestService;
 import au.com.library.loan.service.LoanService;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
@@ -47,6 +49,8 @@ public class LoanServiceImpl implements LoanService {
     private final HoldRequestService holdRequestService;
     private final LoanRepository loanRepository;
 
+    private final LoanMapper mapper;
+
     @Value("${loan.period-days}")
     private int loanPeriodDays;
 
@@ -57,24 +61,24 @@ public class LoanServiceImpl implements LoanService {
      * Creates a new loan for a library book edition copy.
      *
      * @param loanRequestDTO A {@link LoanRequestDTO} containing the data required to create the loan.
-     * @return A {@link LoanResponseDTO} containing details of the created loan.
+     * @return A {@link LoanDTO} containing details of the created loan.
      * @throws CopyUnavailableException if the requested edition copy is not available for loan.
      */
     @Override
     @Transactional
-    public LoanResponseDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
-        Optional<Loan> activeLoan = loanRepository.findActiveLoanForEditionCopy(loanRequestDTO.getEditionCopyId());
+    public LoanDTO createLoan(LoanRequestDTO loanRequestDTO) throws CopyUnavailableException {
+        Optional<Loan> activeLoan = loanRepository.findActiveLoanForEditionCopy(loanRequestDTO.editionCopyId());
         if(activeLoan.isPresent()){
             throw new CopyUnavailableException("The copy of the book requested is already on loan and is not currently available");
         }
-        EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.getEditionCopyId());
-        MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.getMemberId());
+        EditionCopySnapshotDTO copy = bookClient.findCopy(loanRequestDTO.editionCopyId());
+        MemberSnapshotDTO member = memberClient.findMember(loanRequestDTO.memberId());
         EditionSnapshotDTO edition = bookClient.findEdition(copy.getEditionId());
         BookSnapshotDTO book = bookClient.findBook(edition.getBookId());
 
         holdRequestService.loanCreationHoldChecking(copy, member.getId());
         Loan loan = Loan.builder().
-                editionCopyId(loanRequestDTO.getEditionCopyId()).
+                editionCopyId(loanRequestDTO.editionCopyId()).
                 bookTitle(book.getTitle()).
                 author(book.getAuthor()).
                 edition(edition.getEdition()).
@@ -82,12 +86,13 @@ public class LoanServiceImpl implements LoanService {
                 memberId(member.getId()).
                 memberFirstName(member.getFirstName()).
                 memberLastName(member.getLastName()).
-                loanDuration(Duration.of(loanPeriodDays, ChronoUnit.DAYS)).
+                loanPeriod(Period.ofDays(loanPeriodDays)).
                 build();
         Loan saved = saveNewLoan(loan);
         // Publish loan created event for all registered listeners.
         eventPublisher.publishEvent(loanCreatedEvent(saved));
-        return Mapper.map(saved, LoanResponseDTO.class);
+        //return Mapper.map(saved, LoanDTO.class);
+        return mapper.toDTO(saved);
     }
 
     /**
@@ -161,13 +166,13 @@ public class LoanServiceImpl implements LoanService {
      * Finds a loan by its unique id.
      *
      * @param id The id of the loan to find.
-     * @return A {@link LoanResponseDTO} containing details of the found loan.
+     * @return A {@link LoanDTO} containing details of the found loan.
      * @throws ResourceNotFoundException if the loan with the specified id could not be found.
      * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
      */
     @Override
-    public LoanResponseDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException {
-        return Mapper.map(findById(id), LoanResponseDTO.class);
+    public LoanDTO find(Long id) throws ResourceNotFoundException, IllegalArgumentException {
+        return mapper.toDTO(findById(id));
     }
 
     private LoanEvent loanCreatedEvent(Loan loan){

@@ -8,6 +8,7 @@ import lombok.*;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.Period;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -94,7 +95,10 @@ public class Loan {
         private String author;
         private String edition;
         private String barcode;
-        private Duration loanDuration;
+        private Period loanPeriod;
+
+        private Builder() {
+        }
 
         public Builder clock(Clock clock) {
             this.clock = ValidationUtil.checkNonNullParameter(clock, "Clock must not be null");
@@ -141,13 +145,13 @@ public class Loan {
             return this;
         }
 
-        public Builder loanDuration(Duration loanDuration) {
-            this.loanDuration = loanDuration;
+        public Builder loanPeriod(Period loanPeriod) {
+            this.loanPeriod = loanPeriod;
             return this;
         }
 
         public Loan build() {
-            return new Loan(memberId, memberFirstName, memberLastName, editionCopyId, bookTitle, author, edition, barcode, LocalDate.now(clock), loanDuration);
+            return new Loan(memberId, memberFirstName, memberLastName, editionCopyId, bookTitle, author, edition, barcode, LocalDate.now(clock), loanPeriod);
         }
     }
     public static Builder builder() {
@@ -165,7 +169,7 @@ public class Loan {
      * @param barcode The barcode of the edition copy being loaned.
      *
      */
-    private Loan(Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, Duration loanDuration) {
+    private Loan(Long memberId, String memberFirstName, String memberLastName, Long editionCopyId, String bookTitle, String author, String edition, String barcode, LocalDate loanDate, Period loanPeriod) {
         this.memberId = (Long)ValidationUtil.checkNonNullPositiveNumber(memberId, "Member ID must be a non null positive number");
         this.memberFirstName = ValidationUtil.checkNonNullParameter(memberFirstName, "Member first name must not be null");
         this.memberLastName = ValidationUtil.checkNonNullParameter(memberLastName, "Member last name must not be null");
@@ -178,8 +182,8 @@ public class Loan {
         this.loanDate = ValidationUtil.checkNonNullParameter(loanDate, "Loan date must not be null");
         this.renewalCount = 0;
         this.openCopyId = editionCopyId;
-        ValidationUtil.checkNonNullParameter(loanDuration, "Loan Duration must not be null");
-        dueDate = loanDate.plus(loanDuration);
+        ValidationUtil.checkNonNullParameter(loanPeriod, "Loan Duration must not be null");
+        dueDate = loanDate.plus(loanPeriod);
 
     }
 
