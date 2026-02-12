@@ -4,7 +4,7 @@ import au.com.library.loan.entity.HoldRequestStatus;
 
 import java.time.LocalDateTime;
 
-public record HoldRequestResultDTO(
+public record HoldRequestDTO(
         Long id,
         Long memberId,
         String memberFirstName,

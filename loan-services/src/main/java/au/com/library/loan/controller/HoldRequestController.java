@@ -1,7 +1,7 @@
 package au.com.library.loan.controller;
 
+import au.com.library.loan.dto.HoldRequestDTO;
 import au.com.library.loan.dto.HoldRequestInputDTO;
-import au.com.library.loan.dto.HoldRequestResultDTO;
 import au.com.library.loan.service.HoldRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,24 +22,24 @@ public class HoldRequestController {
      * Handles a REST API POST for placing a loan hold request for a member on a specific edition.
      *
      * @param holdRequestInput A {@link HoldRequestInputDTO} object containing the data required for placing a hold request.
-     * @return A {@link ResponseEntity} containing a  {@link HoldRequestResultDTO} object containing details of the new hold request.
+     * @return A {@link ResponseEntity} containing a  {@link HoldRequestDTO} object containing details of the new hold request.
      */
     @PostMapping
-    public ResponseEntity<HoldRequestResultDTO> placeHoldRequest(@RequestBody HoldRequestInputDTO holdRequestInput) {
-        HoldRequestResultDTO result = service.placeHoldRequest(holdRequestInput.memberId(), holdRequestInput.editionId());
-        return new ResponseEntity<HoldRequestResultDTO>(result, HttpStatus.CREATED);
+    public ResponseEntity<HoldRequestDTO> placeHoldRequest(@RequestBody HoldRequestInputDTO holdRequestInput) {
+        HoldRequestDTO result = service.placeHoldRequest(holdRequestInput.memberId(), holdRequestInput.editionId());
+        return new ResponseEntity<HoldRequestDTO>(result, HttpStatus.CREATED);
     }
 
     /**
      * Handles a REST API POST for cancelling a hold request.
      *
      * @param id The id of the hold request to cancel.
-     * @return A {@link ResponseEntity} containing a {@link HoldRequestResultDTO}
+     * @return A {@link ResponseEntity} containing a {@link HoldRequestDTO}
      * object containing details of the canceled hold request.
      */
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<HoldRequestResultDTO> cancelHoldRequest(@PathVariable Long id) {
-        HoldRequestResultDTO result = service.cancelHoldRequest(id);
+    public ResponseEntity<HoldRequestDTO> cancelHoldRequest(@PathVariable Long id) {
+        HoldRequestDTO result = service.cancelHoldRequest(id);
         return ResponseEntity.ok(result);
     }
 }

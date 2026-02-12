@@ -15,7 +15,6 @@ import au.com.library.loan.service.LoanService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ConflictException;
 import au.com.library.shared.exception.ResourceNotFoundException;
-import au.com.library.shared.mapper.Mapper;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
@@ -26,9 +25,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.Period;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import static au.com.library.contracts.event.loan.LoanEventType.*;
@@ -98,13 +95,13 @@ public class LoanServiceImpl implements LoanService {
     /**
      * Renews an existing loan.
      * @param id The id of the loan to renew.
-     * @return A {@link LoanResponseDTO} containing details of the renewed loan.
+     * @return A {@link LoanDTO} containing details of the renewed loan.
      * @throws ConflictException Thrown if the loan is not in a state that allows it to be renewed or has exceeded the maximum number of renewals.
      * @throws ResourceNotFoundException Thrown if the loan with the specified id could not be found.
      * @throws IllegalArgumentException Thrown if the provided id is null or not a positive non-zero value.
      */
     @Override
-    public LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
+    public LoanDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         validateId(id);
         Loan loan = findById(id);
         if(!loan.getStatus().isActive()){
@@ -114,23 +111,23 @@ public class LoanServiceImpl implements LoanService {
         if(loan.getRenewalCount() >= renewalLimit){
             throw new ConflictException("The maximum number of renewals has been reached for this loan");
         }
-        loan.renewLoan(Duration.of(loanPeriodDays, ChronoUnit.DAYS));
+        loan.renewLoan(Period.ofDays(loanPeriodDays));
         Loan renewed = loanRepository.save(loan);
-        return Mapper.map(renewed, LoanResponseDTO.class);
+        return mapper.toDTO(renewed);
     }
 
     /**
      * Returns a loaned book edition copy.
      *
      * @param id The id of the loan to return.
-     * @return A {@link LoanResponseDTO} containing details of the returned loan.
+     * @return A {@link LoanDTO} containing details of the returned loan.
      * @throws ConflictException if the loan is not in a state that allows it to be returned.
      * @throws ResourceNotFoundException if the loan with the specified id could not be found.
      * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
      */
     @Override
     @Transactional
-    public LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
+    public LoanDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.returnLoan();
         Loan saved = loanRepository.save(loan);
@@ -140,26 +137,26 @@ public class LoanServiceImpl implements LoanService {
         holdRequestService.loanReturnAllocation(editionCopySnapshot);
         // Publish loan returned event for all registered listeners.
         eventPublisher.publishEvent(loanReturnedEvent(saved));
-        return Mapper.map(saved, LoanResponseDTO.class);
+        return mapper.toDTO(saved);
     }
 
     /**
      * Marks a loaned book edition copy as lost.
      *
      * @param id The id of the loan to mark as lost.
-     * @return A {@link LoanResponseDTO} containing details of the lost loan.
+     * @return A {@link LoanDTO} containing details of the lost loan.
      * @throws ConflictException if the loan is not in a state that allows it to be marked as lost.
      * @throws ResourceNotFoundException if the loan with the specified id could not be found.
      * @throws IllegalArgumentException if the provided id is null or not a positive non-zero value.
      */
     @Override
     @Transactional
-    public LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
+    public LoanDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException {
         Loan loan = findById(id);
         loan.markLost();
         Loan saved = loanRepository.save(loan);
         eventPublisher.publishEvent(loanLostEvent(saved));
-        return Mapper.map(saved, LoanResponseDTO.class);
+        return mapper.toDTO(saved);
     }
 
     /**

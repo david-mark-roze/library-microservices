@@ -1,8 +1,7 @@
 package au.com.library.loan.service;
 
-import au.com.library.loan.dto.LoanRequestDTO;
 import au.com.library.loan.dto.LoanDTO;
-import au.com.library.loan.dto.LoanResponseDTO;
+import au.com.library.loan.dto.LoanRequestDTO;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.exception.CopyUnavailableException;
 import au.com.library.shared.exception.ConflictException;
@@ -36,33 +35,33 @@ public interface LoanService {
      * Handles the renewal of an existing loan. A renewal may only be performed if the loan is current (i.e. {@link au.com.library.loan.entity.LoanStatus#BORROWED borrowed} or
      * {@link au.com.library.loan.entity.LoanStatus#RENEWED renewed}) and has not exceeded the maximum number of renewals.
      * @param id The id of the loan to renew.
-     * @return A {@link LoanResponseDTO} object containing details of the renewed loan.
+     * @return A {@link LoanDTO} object containing details of the renewed loan.
      * @throws ConflictException Thrown when the loan is not in a state that allows renewal or has exceeded the maximum number of renewals.
      * @throws ResourceNotFoundException Thrown when the loan details could not be found.
      * @throws IllegalArgumentException Thrown when the specified loan id is null or less than or equal to zero.
      */
-    LoanResponseDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
+    LoanDTO renewLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
 
     /**
      * Handles the returning of a loan. The {@link au.com.library.loan.entity.LoanStatus} will be changed to {@link au.com.library.loan.entity.LoanStatus#RETURNED returned} and populated with a return date.
      * @param id The id of the returned loan.
-     * @return A {@link LoanResponseDTO} object containing details of the returned loan.
+     * @return A {@link LoanDTO} object containing details of the returned loan.
      * @throws ConflictException Thrown when the loan has already been returned.
      * @throws ResourceNotFoundException Thrown when the loan details could not be found.
      * @throws IllegalArgumentException Thrown when the specified loan id is null or less than or equal
      */
-    LoanResponseDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
+    LoanDTO returnLoan(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
 
     /**
      * Handles marking an {@link Loan#isOverdue() overdue} loan as lost. The {@link au.com.library.loan.entity.LoanStatus} will be changed to {@link au.com.library.loan.entity.LoanStatus#LOST lost}
      * and the books service will be notified.
      * @param id The id of the lost loan.
-     * @return A {@link LoanResponseDTO} object containing details of the lost loan.
+     * @return A {@link LoanDTO} object containing details of the lost loan.
      * @throws ConflictException Thrown when the loan has already marked as lost or is not overdue.
      * @throws ResourceNotFoundException Thrown when the loan details could not be found.
      * @throws IllegalArgumentException Thrown when the specified loan id is less than or equal to zero.
      */
-    LoanResponseDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
+    LoanDTO markLost(Long id) throws ConflictException, ResourceNotFoundException, IllegalArgumentException;
 
     /**
      * Handles a query to find a {@link au.com.library.loan.entity.Loan loan} by its id.

@@ -1,8 +1,7 @@
 package au.com.library.loan.controller;
 
-import au.com.library.loan.dto.LoanRequestDTO;
 import au.com.library.loan.dto.LoanDTO;
-import au.com.library.loan.dto.LoanResponseDTO;
+import au.com.library.loan.dto.LoanRequestDTO;
 import au.com.library.loan.service.LoanService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,17 +26,17 @@ public class LoanController {
      */
     @PostMapping
     public ResponseEntity<LoanDTO> createLoan(@RequestBody LoanRequestDTO loanRequestDTO){
-        return new ResponseEntity<LoanDTO>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(service.createLoan(loanRequestDTO), HttpStatus.CREATED);
     }
     /**
      * Handles a REST API POST for returning a loan.
      *
-     * @param id A The id of the loan to return.
-     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * @param id The id of the loan to return.
+     * @return A {@link ResponseEntity} containing a {@link LoanDTO}
      * object containing details of the loan returned.
      */
     @PostMapping("/{id}/return")
-    public ResponseEntity<LoanResponseDTO> returnLoan(@PathVariable Long id){
+    public ResponseEntity<LoanDTO> returnLoan(@PathVariable Long id){
         return ResponseEntity.ok(service.returnLoan(id));
     }
 
@@ -46,12 +45,12 @@ public class LoanController {
      *
      * @see au.com.library.loan.service.LoanService#renewLoan(Long)
      *
-     * @param id A The id of the loan to renew.
-     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * @param id The id of the loan to renew.
+     * @return A {@link ResponseEntity} containing a {@link LoanDTO}
      * object containing details of the renewed loan.
      */
     @PostMapping("/{id}/renew")
-    public ResponseEntity<LoanResponseDTO> renewLoan(@PathVariable Long id){
+    public ResponseEntity<LoanDTO> renewLoan(@PathVariable Long id){
         return ResponseEntity.ok(service.renewLoan(id));
     }
 
@@ -59,7 +58,7 @@ public class LoanController {
      * Handles a REST API GET to find {@link au.com.library.loan.entity.Loan loan} by its
      * unique id.
      * @param id The loan id.
-     * @return A {@link ResponseEntity} object containing a {@link LoanResponseDTO} object containing
+     * @return A {@link ResponseEntity} object containing a {@link LoanDTO} object containing
      * the details of the returned loan.
      */
     @GetMapping("/{id}")
@@ -71,11 +70,11 @@ public class LoanController {
      * Handles a REST API POST to mark a loan as lost.
      *
      * @param id The id of the loan to mark as lost.
-     * @return A {@link ResponseEntity} containing a {@link LoanResponseDTO}
+     * @return A {@link ResponseEntity} containing a {@link LoanDTO}
      * object containing details of the lost loan.
      */
     @PostMapping("/{id}/lost")
-    public ResponseEntity<LoanResponseDTO> markLost(@PathVariable Long id){
+    public ResponseEntity<LoanDTO> markLost(@PathVariable Long id){
         return ResponseEntity.ok(service.markLost(id));
     }
 }

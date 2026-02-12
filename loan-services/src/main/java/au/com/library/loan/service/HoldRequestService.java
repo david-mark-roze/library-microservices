@@ -1,7 +1,7 @@
 package au.com.library.loan.service;
 
 import au.com.library.loan.dto.EditionCopySnapshotDTO;
-import au.com.library.loan.dto.HoldRequestResultDTO;
+import au.com.library.loan.dto.HoldRequestDTO;
 import au.com.library.loan.entity.HoldRequestStatus;
 import au.com.library.loan.exception.BlockedLoanException;
 import au.com.library.loan.exception.DuplicateHoldRequestException;
@@ -16,11 +16,11 @@ public interface HoldRequestService {
      * Place a loan hold request for a member on a specific edition.
      * @param memberId The ID of the member placing the hold request.
      * @param editionId The ID of the edition for which the hold request is being placed.
-     * @return  A {@link HoldRequestResultDTO} object containing the result of the hold request placement.
+     * @return  A {@link HoldRequestDTO} object containing the result of the hold request placement.
      * @throws ResourceNotFoundException Thrown when the member or edition could not be found.
      * @throws DuplicateHoldRequestException Thrown when a duplicate hold request is for the same member and edition.
      */
-    HoldRequestResultDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException;
+    HoldRequestDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException;
 
     /**
      * Checks for any 'open' hold requests (i.e. {@link HoldRequestStatus#ACTIVE active} or {@link HoldRequestStatus#ALLOCATED allocated})
@@ -52,9 +52,9 @@ public interface HoldRequestService {
      * If the hold request is completed, it cannot be cancelled and a ConflictException will be thrown. If the hold request is not found, a ResourceNotFoundException will be thrown.
      *
      * @param holdRequestId The ID of the hold request to cancel.
-     * @return A {@link HoldRequestResultDTO} object containing the details of the cancelled hold request.
+     * @return A {@link HoldRequestDTO} object containing the details of the cancelled hold request.
      * @throws ResourceNotFoundException Thrown when a hold request with the specified ID could not be found.
      * @throws ConflictException Thrown when the hold request is in a completed state and therefore cannot be cancelled.
      */
-    HoldRequestResultDTO cancelHoldRequest(Long holdRequestId) throws ResourceNotFoundException, ConflictException;
+    HoldRequestDTO cancelHoldRequest(Long holdRequestId) throws ResourceNotFoundException, ConflictException;
 }

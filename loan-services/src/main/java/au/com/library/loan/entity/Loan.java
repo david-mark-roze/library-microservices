@@ -208,17 +208,17 @@ public class Loan {
      * Handles the renewal of a loan. This includes {@link LoanStatus#BORROWED borrowed} and {@link LoanStatus#RENEWED renewed} loans, where, with the latter, the loan may be extended while still under renewal.
      * The {@link #getDueDate() due date} will be extended by the specified {@link Duration}.
      *
-     * @param loanDuration The duration to extend the due date by. Must not be null.
+     * @param loanPeriod The period by which to extend the loan's due date. Must not be null or negative.
      * @throws ConflictException        Thrown when the loan is not in a state that allows renewal.
      * @throws IllegalArgumentException Thrown when the specified loan duration null or has a negative duration.
      */
-    public void renewLoan(Duration loanDuration){
-        ValidationUtil.checkNonNullParameter(loanDuration, "Loan duration must not be null");
-        if(loanDuration.isNegative()){
-            throw new IllegalArgumentException("The loan Duration must be greater than zero");
+    public void renewLoan(Period loanPeriod){
+        ValidationUtil.checkNonNullParameter(loanPeriod, "Loan period must not be null");
+        if(loanPeriod.isNegative()){
+            throw new IllegalArgumentException("The loan period must be greater than zero days");
         }
         if (getStatus().isActive()) {
-            dueDate = dueDate.plus(loanDuration);
+            dueDate = dueDate.plus(loanPeriod);
             if (status.isBorrowed()) {
                 status = LoanStatus.RENEWED;
             }

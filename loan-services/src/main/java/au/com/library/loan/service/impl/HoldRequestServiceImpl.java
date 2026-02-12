@@ -50,7 +50,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     private int loanHoldPeriodDays;
 
     @Override
-    public HoldRequestResultDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException {
+    public HoldRequestDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException {
         memberId = (Long)ValidationUtil.checkNonNullPositiveNumber(memberId, "Member ID must be a non null positive number.");
         editionId = (Long)ValidationUtil.checkNonNullPositiveNumber(editionId, "Edition ID must be a non null positive number.");
 
@@ -111,7 +111,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     }
 
     @Override
-    public HoldRequestResultDTO cancelHoldRequest(Long holdRequestId) throws ResourceNotFoundException, ConflictException {
+    public HoldRequestDTO cancelHoldRequest(Long holdRequestId) throws ResourceNotFoundException, ConflictException {
         Long finalHoldRequestId  = (Long)ValidationUtil.checkNonNullPositiveNumber(holdRequestId, "Hold Request ID must be a non null positive number.");
 
         HoldRequest holdRequest = holdRequestRepository.findById(holdRequestId).orElseThrow(() -> new ResourceNotFoundException(String.format("Hold request with ID %d could not be found.", finalHoldRequestId)));
