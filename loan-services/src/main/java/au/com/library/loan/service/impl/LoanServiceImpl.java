@@ -4,6 +4,7 @@ import au.com.library.contracts.event.loan.LoanEvent;
 import au.com.library.contracts.event.loan.LoanEventContext;
 import au.com.library.loan.client.BookClient;
 import au.com.library.loan.client.MemberClient;
+import au.com.library.loan.config.LoanConfiguration;
 import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.Loan;
 import au.com.library.loan.entity.LoanStatus;
@@ -19,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -47,12 +47,7 @@ public class LoanServiceImpl implements LoanService {
     private final LoanRepository loanRepository;
 
     private final LoanMapper mapper;
-
-    @Value("${loan.period-days}")
-    private int loanPeriodDays;
-
-    @Value("${renewal.limit}")
-    private int renewalLimit;
+    private final LoanConfiguration configuration;
 
     /**
      * Creates a new loan for a library book edition copy.
@@ -83,7 +78,7 @@ public class LoanServiceImpl implements LoanService {
                 memberId(member.id()).
                 memberFirstName(member.firstName()).
                 memberLastName(member.lastName()).
-                loanPeriod(Period.ofDays(loanPeriodDays)).
+                loanPeriod(Period.ofDays(configuration.periodDays())).
                 build();
         Loan saved = saveNewLoan(loan);
         // Publish loan created event for all registered listeners.
@@ -108,10 +103,10 @@ public class LoanServiceImpl implements LoanService {
             throw new ConflictException(String.format("Only loans with status %s or %s can be renewed",
                     LoanStatus.BORROWED, LoanStatus.RENEWED));
         }
-        if(loan.getRenewalCount() >= renewalLimit){
+        if(loan.getRenewalCount() >= configuration.renewalLimit()){
             throw new ConflictException("The maximum number of renewals has been reached for this loan");
         }
-        loan.renewLoan(Period.ofDays(loanPeriodDays));
+        loan.renewLoan(Period.ofDays(configuration.periodDays()));
         Loan renewed = loanRepository.save(loan);
         return mapper.toDTO(renewed);
     }

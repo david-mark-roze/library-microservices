@@ -21,7 +21,7 @@ public final class ValidationUtil {
      * @param <T> The type of the object being checked.
      */
     public static  <T> T checkNonNullParameter(T object, String message){
-        return Objects.requireNonNullElseGet(object, () -> {;
+        return Objects.requireNonNullElseGet(object, () -> {
             throw new IllegalArgumentException(message);
         });
     }

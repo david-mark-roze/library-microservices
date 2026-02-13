@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -35,9 +34,9 @@ public class HoldAllocationServiceImpl implements HoldAllocationService {
     public void expireAllocations() {
         LOGGER.info("Starting scheduled task to expire hold allocations...");
         List<Long> allocationIds = holdAllocationRepository.findExpired();
-        LOGGER.info("Found {0} expired hold allocations to process...", allocationIds.size());
+        LOGGER.info("Found {} expired hold allocations to process...", allocationIds.size());
         if (!allocationIds.isEmpty()) {
-            allocationIds.forEach(id -> expireAllocation(id));
+            allocationIds.forEach(this::expireAllocation);
         }
         LOGGER.info("Finished scheduled hold allocations expiry task.");
     }
@@ -46,8 +45,8 @@ public class HoldAllocationServiceImpl implements HoldAllocationService {
     public void expireAllocation(Long id) {
         holdAllocationRepository.findAllocatedByIdForUpdate(id)
                 .ifPresentOrElse(
-                        allocation -> handleAllocationExpiry(allocation),
-                        () -> LOGGER.info("The hold allocation with id {0} is no longer allocated. Skipping expiry processing for this allocation.", id)
+                        this::handleAllocationExpiry,
+                        () -> LOGGER.info("The hold allocation with id {} is no longer allocated. Skipping expiry processing for this allocation.", id)
                 );
     }
 

@@ -2,6 +2,7 @@ package au.com.library.loan.service.impl;
 
 import au.com.library.loan.client.BookClient;
 import au.com.library.loan.client.MemberClient;
+import au.com.library.loan.config.LoanConfiguration;
 import au.com.library.loan.dto.*;
 import au.com.library.loan.entity.HoldAllocation;
 import au.com.library.loan.entity.HoldRequest;
@@ -20,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -45,9 +45,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
     private final HoldAllocationRepository allocationRepository;
 
     private final HoldRequestMapper mapper;
-
-    @Value("${loan.hold-period-days}")
-    private int loanHoldPeriodDays;
+    private final LoanConfiguration configuration;
 
     @Override
     public HoldRequestDTO placeHoldRequest(Long memberId, Long editionId) throws ResourceNotFoundException {
@@ -85,7 +83,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         HoldRequest holdRequest = findOpenHoldRequests(editionCopySnapshot.editionId());
         // If there are no open hold requests for the edition, the loan creation can proceed without hold restrictions
         if(holdRequest == null){
-            LOGGER.info("No open hold requests found for edition ID {0}. Loan creation can proceed without hold restrictions.", editionCopySnapshot.editionId());
+            LOGGER.info("No open hold requests found for edition ID {}. Loan creation can proceed without hold restrictions.", editionCopySnapshot.editionId());
             return;
         }
         // If there is an open hold request for the edition, check if it belongs to the member attempting to create the loan. If it does, the loan creation can proceed but the hold request status needs to be updated accordingly.
@@ -124,7 +122,7 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         if(allocation != null){
             allocationRepository.save(allocation);
         }
-        LOGGER.info("Hold request with ID {0} has been marked as cancelled. If there was an associated hold allocation, it has also been marked as cancelled.", holdRequestId);
+        LOGGER.info("Hold request with ID {} has been marked as cancelled. If there was an associated hold allocation, it has also been marked as cancelled.", holdRequestId);
         return mapper.toDTO(savedHoldRequest);
     }
 
@@ -153,11 +151,11 @@ public class HoldRequestServiceImpl implements HoldRequestService {
                 .holdRequest(holdRequest)
                 .editionCopyId(editionCopySnapshot.id())
                 .barcode(editionCopySnapshot.barcode())
-                .allocationDuration(Duration.of(loanHoldPeriodDays, ChronoUnit.DAYS))
+                .allocationDuration(Duration.of(configuration.holdPeriodDays(), ChronoUnit.DAYS))
                 .build();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
-        LOGGER.info("Hold request with ID {0} has been marked as allocated and a new hold allocation has been created for edition ID {1}.", holdRequest.getId(), editionCopySnapshot.editionId());
+        LOGGER.info("Hold request with ID {} has been marked as allocated and a new hold allocation has been created for edition ID {}.", holdRequest.getId(), editionCopySnapshot.editionId());
     }
 
     private void handleAllocatedHoldRequest(HoldRequest holdRequest, EditionCopySnapshotDTO editionCopySnapshot, Long memberId) throws BlockedLoanException {
@@ -166,6 +164,6 @@ public class HoldRequestServiceImpl implements HoldRequestService {
         allocation.collect();
         holdRequestRepository.save(holdRequest);
         allocationRepository.save(allocation);
-        LOGGER.info("Hold request with ID {0} has been marked as completed and the associated hold allocation has been marked as collected for member ID {1} and edition ID {2}.", holdRequest.getId(), memberId, editionCopySnapshot.editionId());
+        LOGGER.info("Hold request with ID {} has been marked as completed and the associated hold allocation has been marked as collected for member ID {} and edition ID {}.", holdRequest.getId(), memberId, editionCopySnapshot.editionId());
     }
 }
