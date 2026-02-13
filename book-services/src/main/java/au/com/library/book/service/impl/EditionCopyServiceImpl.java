@@ -11,12 +11,15 @@ import au.com.library.book.service.EditionCopyService;
 import au.com.library.shared.exception.BadRequestException;
 import au.com.library.shared.exception.ResourceNotFoundException;
 import au.com.library.shared.util.BarcodeGenerator;
+import au.com.library.shared.util.Numbers;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 @AllArgsConstructor
 @Service
@@ -28,17 +31,22 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     private EditionCopyRepository editionCopyRepository;
 
     @Override
-    public EditionCopyDTO addCopy(Long editionId) throws ResourceNotFoundException {
-        Edition edition = editionRepository.findById(editionId).orElseThrow(
-                ()-> new ResourceNotFoundException("An edition with the id %s could not be found")
-        );
-        EditionCopy copy = EditionCopy.builder().
-                edition(edition).
-                status(EditionCopyStatus.AVAILABLE).
-                barcode(BarcodeGenerator.generate()).
-                build();
+    public EditionCopyDTO addCopy(Long editionId) throws ResourceNotFoundException, BadRequestException {
+        Numbers.isNonNullNonZeroOrElseThrow(editionId, () -> new BadRequestException("The edition id must be a non null positive number."));
+        Edition edition = findEditionById(editionId);
+        EditionCopy copy = EditionCopy.of(edition);
         EditionCopy saved = editionCopyRepository.save(copy);
         return EditionCopyDTO.toDTO(saved);
+    }
+
+    @Override
+    public List<EditionCopyDTO> addCopies(Long editionId, Integer numberOfCopies) throws ResourceNotFoundException, BadRequestException {
+        Numbers.isNonNullNonZeroOrElseThrow(editionId, () -> new BadRequestException("The edition id must be a non null positive number."));
+        Numbers.isNonNullNonZeroOrElseThrow(numberOfCopies, () -> new BadRequestException("The number of copies must be a non null positive number."));
+        Edition edition = findEditionById(editionId);
+        Collection<EditionCopy> copies = EditionCopy.of(edition, numberOfCopies);
+        List<EditionCopy> saved = editionCopyRepository.saveAll(copies);
+        return saved.stream().map(EditionCopyDTO::toDTO).toList();
     }
 
     @Override
@@ -99,6 +107,13 @@ public class EditionCopyServiceImpl implements EditionCopyService {
     private EditionCopy findById(Long copyId) {
         return editionCopyRepository.findById(copyId).orElseThrow(
                 () -> new ResourceNotFoundException(String.format("The edition copy with the copy id %s could not be found", copyId)
+                )
+        );
+    }
+
+    private Edition findEditionById(Long editionId){
+        return editionRepository.findById(editionId).orElseThrow(
+                () -> new ResourceNotFoundException(String.format("The edition with the id %s could not be found", editionId)
                 )
         );
     }

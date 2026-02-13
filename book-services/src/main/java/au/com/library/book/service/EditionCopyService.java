@@ -2,6 +2,7 @@ package au.com.library.book.service;
 
 import au.com.library.book.dto.EditionCopyDTO;
 import au.com.library.shared.exception.ResourceNotFoundException;
+import au.com.library.shared.exception.BadRequestException;
 
 import java.util.List;
 
@@ -21,6 +22,19 @@ public interface EditionCopyService {
      * @throws ResourceNotFoundException Thrown when the edition could not be found.
      */
     EditionCopyDTO addCopy(Long editionId) throws ResourceNotFoundException;
+
+    /**
+     * Handles the creation of multiple {@link au.com.library.book.entity.EditionCopy copies} of
+     * an {@link au.com.library.book.entity.Edition edition} of a
+     * {@link au.com.library.book.entity.Book book}.
+     *
+     * @param editionId The id of the edition to which the copies will be linked.
+     * @param numberOfCopies The number of copies to be created.
+     * @return A {@link EditionCopyDTO} object containing the details of one of the new copies.
+     * @throws ResourceNotFoundException Thrown when the edition could not be found.
+     * @throws BadRequestException Thrown when the edition id or the number of copies is not a non-null positive number.
+     */
+    List<EditionCopyDTO> addCopies(Long editionId, Integer numberOfCopies) throws ResourceNotFoundException;
 
     /**
      * Marks an edition copy as being {@link au.com.library.book.entity.EditionCopyStatus#LOANED on loan}.

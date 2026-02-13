@@ -66,7 +66,7 @@ public class BookController {
      */
     @PostMapping("/{bookId}/editions")
     public ResponseEntity<EditionDTO> addEdition(@PathVariable Long bookId, @RequestBody EditionDTO editionDTO){
-        return new ResponseEntity<EditionDTO>(editionService.addEdition(bookId, editionDTO), HttpStatus.CREATED);
+        return new ResponseEntity<>(editionService.addEdition(bookId, editionDTO), HttpStatus.CREATED);
     }
 
 

@@ -416,11 +416,7 @@ public class BookServiceRepositoriesTest {
     }
 
     private EditionCopy buildTestEditionCopy(Edition edition, String barcode){
-        return EditionCopy.builder().
-                barcode(barcode).
-                edition(edition).
-                status(EditionCopyStatus.AVAILABLE).
-                build();
+        return EditionCopy.of(edition);
     }
 
     private void forceCommit(){

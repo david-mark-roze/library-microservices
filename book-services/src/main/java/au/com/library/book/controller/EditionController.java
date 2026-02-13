@@ -58,7 +58,7 @@ public class EditionController {
      */
     @PostMapping("/{editionId}/copies")
     public ResponseEntity<EditionCopyDTO> addCopy(@PathVariable Long editionId){
-        return new ResponseEntity<EditionCopyDTO>( editionCopyService.addCopy(editionId), HttpStatus.CREATED);
+        return new ResponseEntity<>( editionCopyService.addCopy(editionId), HttpStatus.CREATED);
     }
 
     /**
