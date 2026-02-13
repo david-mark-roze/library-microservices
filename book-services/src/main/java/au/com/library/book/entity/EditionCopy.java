@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * This represents a copy of an {@link Edition book edition} at the library
@@ -18,6 +19,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
+// The @EntityListeners annotation specifies that the AuditingEntityListener should be used
+// to automatically populate auditing fields such as status when the copy has been loaned, returned, or marked as lost.
 @EntityListeners(AuditingEntityListener.class)
 @Entity
 public class EditionCopy {
@@ -88,6 +92,28 @@ public class EditionCopy {
             throw new ConflictException("The edition copy is already marked as lost.");
         }
         status = EditionCopyStatus.LOST;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        EditionCopy that = (EditionCopy) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "EditionCopy{" +
+                "id=" + id +
+                ", barcode='" + barcode + '\'' +
+                ", status=" + status +
+                ", dateAcquired=" + dateAcquired +
+                '}';
     }
 
     private void checkLost(){

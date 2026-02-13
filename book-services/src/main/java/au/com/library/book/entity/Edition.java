@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -58,4 +59,28 @@ public class Edition {
     // Edition by the name 'edition'.
     @OneToMany(mappedBy = "edition", fetch = FetchType.LAZY)
     private Set<EditionCopy> copies = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Edition edition = (Edition) o;
+        return Objects.equals(id, edition.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Edition{" +
+                "id=" + id +
+                ", isbn='" + isbn + '\'' +
+                ", publisher='" + publisher + '\'' +
+                ", publicationYear=" + publicationYear +
+                ", edition='" + edition + '\'' +
+                ", format=" + format +
+                '}';
+    }
 }

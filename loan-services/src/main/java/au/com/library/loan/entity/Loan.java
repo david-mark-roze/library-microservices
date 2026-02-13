@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.Objects;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
@@ -251,6 +252,38 @@ public class Loan {
         }
         this.status = LoanStatus.LOST;
         closeLoanCopy();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Loan loan = (Loan) o;
+        return Objects.equals(id, loan.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Loan{" +
+                "id=" + id +
+                ", memberId=" + memberId +
+                ", memberFirstName='" + memberFirstName + '\'' +
+                ", memberLastName='" + memberLastName + '\'' +
+                ", editionCopyId=" + editionCopyId +
+                ", bookTitle='" + bookTitle + '\'' +
+                ", author='" + author + '\'' +
+                ", edition='" + edition + '\'' +
+                ", barcode='" + barcode + '\'' +
+                ", loanDate=" + loanDate +
+                ", dueDate=" + dueDate +
+                ", renewalCount=" + renewalCount +
+                ", returnDate=" + returnDate +
+                ", status=" + status +
+                '}';
     }
 
     private void closeLoanCopy() {

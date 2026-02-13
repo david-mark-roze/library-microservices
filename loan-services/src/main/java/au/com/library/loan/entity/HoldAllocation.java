@@ -200,6 +200,33 @@ public class HoldAllocation {
         holdRequest.expire();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        HoldAllocation that = (HoldAllocation) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+        return "HoldAllocation{" +
+                "id=" + id +
+                ", holdRequest=" + holdRequest +
+                ", editionCopyId=" + editionCopyId +
+                ", barcode='" + barcode + '\'' +
+                ", status=" + status +
+                ", allocatedAt=" + allocatedAt +
+                ", endDate=" + endDate +
+                ", expiryDate=" + expiryDate +
+                ", openCopyId=" + openCopyId +
+                '}';
+    }
+
     private HoldAllocation(HoldRequest holdRequest, Long editionCopyId, String barcode, LocalDateTime allocatedAt, Duration allocationDuration) {
         this.holdRequest = ValidationUtil.checkNonNullParameter(holdRequest, "HoldRequest cannot be null");
         this.editionCopyId = (Long)ValidationUtil.checkNonNullPositiveNumber(editionCopyId, "Edition copy id must be non-null and greater than zero");

@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Entity representing a hold request made by a library member for a specific book edition.
@@ -214,6 +215,36 @@ public class HoldRequest {
      */
     public static Builder builder() {
         return new Builder();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        HoldRequest that = (HoldRequest) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
+    @Override
+    public String toString() {
+       return "HoldRequest{" +
+                "id=" + id +
+                ", memberId=" + memberId +
+                ", memberLastName='" + memberLastName + '\'' +
+                ", memberFirstName='" + memberFirstName + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", editionId=" + editionId +
+                ", bookTitle='" + bookTitle + '\'' +
+                ", author='" + author + '\'' +
+                ", edition='" + edition + '\'' +
+                ", status=" + status +
+                ", requestedAt=" + requestedAt +
+                '}';
     }
 
     private HoldRequest(Long memberId, String memberLastName, String memberFirstName, String email, String phone, Long editionId, String bookTitle, String author, String edition) {
